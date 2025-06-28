@@ -2,55 +2,121 @@ const { EmbedBuilder, AuditLogEvent } = require('discord.js');
 
 module.exports = (client) => {
   client.on('voiceStateUpdate', async (oldState, newState) => {
-    const logChannel = newState.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
-    if (!logChannel) return;
+    try {
+      const logChannel = newState.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      if (!logChannel) return;
 
-    const user = newState.member.user;
-
-    // Katılma
-    if (!oldState.channelId && newState.channelId) {
+      const user = newState.member.user;
       const embed = new EmbedBuilder()
-        .setTitle('🔊 Ses Kanalına Katıldı')
-        .setColor('#43B581')
         .setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
-        .addFields(
-          { name: 'Kullanıcı', value: `${user} (\`${user.id}\`)` },
-          { name: 'Ses Kanalı', value: `<#${newState.channelId}>` }
-        )
         .setTimestamp();
 
-      return logChannel.send({ embeds: [embed] });
-    }
+      // Kanal katılım
+      if (!oldState.channelId && newState.channelId) {
+        embed
+          .setTitle('🔊 Ses Kanalına Katıldı')
+          .setColor('#43B581')
+          .addFields(
+            { name: 'Kullanıcı', value: `${user} (\`${user.id}\`)` },
+            { name: 'Ses Kanalı', value: `<#${newState.channelId}>` }
+          );
 
-    // Ayrılma
-    if (oldState.channelId && !newState.channelId) {
-      const embed = new EmbedBuilder()
-        .setTitle('🔈 Ses Kanalından Ayrıldı')
-        .setColor('#FF0000')
-        .setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
-        .addFields(
-          { name: 'Kullanıcı', value: `${user} (\`${user.id}\`)` },
-          { name: 'Ses Kanalı', value: `<#${oldState.channelId}>` }
-        )
-        .setTimestamp();
+        await logChannel.send({ embeds: [embed] });
+        console.log(`✅ ${user.tag} ses kanalına katıldı.`);
+        return;
+      }
 
-      return logChannel.send({ embeds: [embed] });
-    }
+      // Kanal ayrılma
+      if (oldState.channelId && !newState.channelId) {
+        embed
+          .setTitle('🔈 Ses Kanalından Ayrıldı')
+          .setColor('#FF0000')
+          .addFields(
+            { name: 'Kullanıcı', value: `${user} (\`${user.id}\`)` },
+            { name: 'Ses Kanalı', value: `<#${oldState.channelId}>` }
+          );
 
-    // Kanal değiştirme
-    if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-      const embed = new EmbedBuilder()
-        .setTitle('🔄 Ses Kanalı Değiştirildi')
-        .setColor('#FFFF00')
-        .setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
-        .addFields(
-          { name: 'Kullanıcı', value: `${user} (\`${user.id}\`)` },
-          { name: 'Eski Kanal', value: `<#${oldState.channelId}>`, inline: true },
-          { name: 'Yeni Kanal', value: `<#${newState.channelId}>`, inline: true }
-        )
-        .setTimestamp();
+        await logChannel.send({ embeds: [embed] });
+        console.log(`✅ ${user.tag} ses kanalından ayrıldı.`);
+        return;
+      }
 
-      return logChannel.send({ embeds: [embed] });
+      // Kanal değiştirme
+      if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
+        embed
+          .setTitle('🔄 Ses Kanalı Değiştirildi')
+          .setColor('#FFFF00')
+          .addFields(
+            { name: 'Kullanıcı', value: `${user} (\`${user.id}\`)` },
+            { name: 'Eski Kanal', value: `<#${oldState.channelId}>`, inline: true },
+            { name: 'Yeni Kanal', value: `<#${newState.channelId}>`, inline: true }
+          );
+
+        await logChannel.send({ embeds: [embed] });
+        console.log(`✅ ${user.tag} ses kanalı değiştirdi.`);
+        return;
+      }
+
+      // Mikrofon açma/kapatma
+      if (oldState.selfMute !== newState.selfMute) {
+        embed
+          .setTitle('🎙️ Mikrofon Durumu Değişti')
+          .setColor(newState.selfMute ? '#FF0000' : '#43B581')
+          .addFields(
+            { name: 'Kullanıcı', value: `${user} (\`${user.id}\`)` },
+            { name: 'Durum', value: newState.selfMute ? 'Mikrofonu kapattı' : 'Mikrofonu açtı' }
+          );
+
+        await logChannel.send({ embeds: [embed] });
+        console.log(`✅ ${user.tag} mikrofon durumunu değiştirdi.`);
+        return;
+      }
+
+      // Kulaklık açma/kapatma (Deafen)
+      if (oldState.selfDeaf !== newState.selfDeaf) {
+        embed
+          .setTitle('🎧 Kulaklık Durumu Değişti')
+          .setColor(newState.selfDeaf ? '#FF0000' : '#43B581')
+          .addFields(
+            { name: 'Kullanıcı', value: `${user} (\`${user.id}\`)` },
+            { name: 'Durum', value: newState.selfDeaf ? 'Kulaklığını kapattı (Deafen)' : 'Kulaklığını açtı (Un-Deafen)' }
+          );
+
+        await logChannel.send({ embeds: [embed] });
+        console.log(`✅ ${user.tag} kulaklık durumunu değiştirdi.`);
+        return;
+      }
+
+      // Sunucu bazlı mute/deafen değişimi (admin mute)
+      if (oldState.serverMute !== newState.serverMute) {
+        embed
+          .setTitle('🔇 Sunucu Mikrofon Durumu Değişti')
+          .setColor(newState.serverMute ? '#FF4500' : '#00FF00')
+          .addFields(
+            { name: 'Kullanıcı', value: `${user} (\`${user.id}\`)` },
+            { name: 'Durum', value: newState.serverMute ? 'Sunucu tarafından mikrofona kapatıldı' : 'Sunucu tarafından mikrofona açıldı' }
+          );
+
+        await logChannel.send({ embeds: [embed] });
+        console.log(`✅ ${user.tag} sunucu mikrofon durumunu değiştirdi.`);
+        return;
+      }
+
+      if (oldState.serverDeaf !== newState.serverDeaf) {
+        embed
+          .setTitle('🔇 Sunucu Kulaklık Durumu Değişti')
+          .setColor(newState.serverDeaf ? '#FF4500' : '#00FF00')
+          .addFields(
+            { name: 'Kullanıcı', value: `${user} (\`${user.id}\`)` },
+            { name: 'Durum', value: newState.serverDeaf ? 'Sunucu tarafından kulaklık kapatıldı' : 'Sunucu tarafından kulaklık açıldı' }
+          );
+
+        await logChannel.send({ embeds: [embed] });
+        console.log(`✅ ${user.tag} sunucu kulaklık durumunu değiştirdi.`);
+        return;
+      }
+    } catch (error) {
+      console.error('❌ [HATA] voiceStateUpdate log hatası:', error);
     }
   });
 };

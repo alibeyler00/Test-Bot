@@ -1,31 +1,75 @@
-// Kullanıma kapalı
-
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
 
 module.exports = (client) => {
   client.on('webhookUpdate', async (channel) => {
-    const logChannel = channel.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
-    if (!logChannel) return;
-
-    let auditEntry;
     try {
-      const auditLogs = await channel.guild.fetchAuditLogs({ type: AuditLogEvent.WebhookCreate, limit: 1 });
-      auditEntry = auditLogs.entries.first();
-    } catch {}
+      const logChannel = channel.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      if (!logChannel) return;
 
-    const embedCreate = new EmbedBuilder()
-      .setTitle('🌐 Webhook Güncellendi')
-      .setColor('#00CED1')
-      .setDescription(`Webhooklar güncellendi: <#${channel.id}>`)
-      .setTimestamp();
+      // Audit logları webhook ile ilgili farklı türlerde inceleyelim:
+      const auditTypes = [
+        AuditLogEvent.WebhookCreate,
+        AuditLogEvent.WebhookUpdate,
+        AuditLogEvent.WebhookDelete
+      ];
 
-    if (auditEntry) {
-      embedCreate.addFields(
-        { name: 'Yetkili', value: `${auditEntry.executor.tag} (\`${auditEntry.executor.id}\`)` },
-        { name: 'Webhook', value: auditEntry.target.name }
-      );
+      // En son webhook ile ilgili herhangi bir işlem
+      let auditEntry;
+      for (const type of auditTypes) {
+        try {
+          const auditLogs = await channel.guild.fetchAuditLogs({ type, limit: 1 });
+          const entry = auditLogs.entries.first();
+          if (entry && entry.createdTimestamp > (Date.now() - 10000)) { // son 10 saniyede
+            auditEntry = entry;
+            break;
+          }
+        } catch {}
+      }
+
+      let title = '🌐 Webhook Güncellendi';
+      let color = '#00CED1'; // default renk
+      let description = `Webhooklar güncellendi: <#${channel.id}>`;
+
+      if (auditEntry) {
+        switch (auditEntry.action) {
+          case AuditLogEvent.WebhookCreate:
+            title = '➕ Webhook Oluşturuldu';
+            color = '#32CD32';
+            description = `Yeni webhook oluşturuldu: **${auditEntry.target.name}** (<#${channel.id}>)`;
+            break;
+          case AuditLogEvent.WebhookUpdate:
+            title = '✏️ Webhook Güncellendi';
+            color = '#FFA500';
+            description = `Webhook güncellendi: **${auditEntry.target.name}** (<#${channel.id}>)`;
+            break;
+          case AuditLogEvent.WebhookDelete:
+            title = '🗑️ Webhook Silindi';
+            color = '#FF4500';
+            description = `Webhook silindi: **${auditEntry.target.name}** (<#${channel.id}>)`;
+            break;
+        }
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle(title)
+        .setColor(color)
+        .setDescription(description)
+        .setTimestamp();
+
+      if (auditEntry && auditEntry.executor) {
+        embed.addFields(
+          { name: 'Yetkili', value: `${auditEntry.executor.tag} (\`${auditEntry.executor.id}\`)` }
+        );
+      } else {
+        embed.addFields(
+          { name: 'Yetkili', value: 'Bilinmiyor' }
+        );
+      }
+
+      await logChannel.send({ embeds: [embed] });
+      console.log(`✅ Webhook logu gönderildi: ${title}`);
+    } catch (error) {
+      console.error('❌ [HATA] webhookUpdate log hatası:', error);
     }
-
-    logChannel.send({ embeds: [embedCreate] });
   });
 };
