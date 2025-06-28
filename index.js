@@ -1,7 +1,10 @@
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
-require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
+const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
+const { broadcastLog, clients } = require('./websocket');
 
 const client = new Client({
   intents: [
@@ -22,51 +25,81 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
+client._loadedEvents = [];
 
 client.once('ready', () => {
   console.log(`${client.user.tag} aktif!`);
 });
 
-
-const kolayPaketYolu = path.join(__dirname, 'kolay-paket-log');
-fs.readdirSync(kolayPaketYolu).forEach((file) => {
-  if (file.endsWith('.js')) {
-    const modul = require(path.join(kolayPaketYolu, file));
-    modul(client);
+function registerEventsFrom(folder) {
+  if (!fs.existsSync(folder)) {
+    console.warn(`[UYARI] ${folder} klasörü bulunamadı!`);
+    return;
   }
-});
 
-const OrtaPaketYolu = path.join(__dirname, 'orta-paket-log');
-fs.readdirSync(OrtaPaketYolu).forEach((file) => {
-  if (file.endsWith('.js')) {
-    const modul = require(path.join(OrtaPaketYolu, file));
-    modul(client);
+  const files = fs.readdirSync(folder);
+  for (const file of files) {
+    if (file.endsWith('.js')) {
+      const eventPath = path.join(folder, file);
+      const eventModule = require(eventPath);
+      if (typeof eventModule === 'function') {
+        eventModule(client);
+        const eventName = file.replace('.js', '');
+        client._loadedEvents.push(eventName);
+        console.log(`[✅] Event yüklendi: ${eventName}`);
+      } else {
+        console.warn(`[UYARI] ${file} fonksiyon olarak export edilmemiş!`);
+      }
+    }
   }
-});
+}
 
-const GelismisPaketYolu = path.join(__dirname, 'gelismis-paket-log');
-fs.readdirSync(GelismisPaketYolu).forEach((file) => {
-  if (file.endsWith('.js')) {
-    const modul = require(path.join(GelismisPaketYolu, file));
-    modul(client);
-  }
-});
 
-const express = require('express');
+registerEventsFrom(path.join(__dirname, 'kolay-paket-log'));
+registerEventsFrom(path.join(__dirname, 'orta-paket-log'));
+registerEventsFrom(path.join(__dirname, 'gelismis-paket-log'));
+
+// Express + WebSocket server
 const app = express();
-
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+// Ana sayfa
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 app.get('/api/bot-info', (req, res) => {
-  const commands = client.commands ? Array.from(client.commands.keys()) : [];
-  const events = client.eventNames ? client.eventNames() : [];
+  const commands = []; // Komut sistemin yoksa boş
+  const events = client._loadedEvents || [];
+
+  console.log(">> API İSTEĞİ /api/bot-info");
+  console.log(">> Yüklü Eventler:", events);
 
   res.json({ commands, events });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Uptime sistemi aktif. Port: ${PORT}`));
+// WebSocket server
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ noServer: true });
 
+wss.on('connection', (ws) => {
+  clients.add(ws);
+  ws.on('close', () => clients.delete(ws));
+});
+
+server.on('upgrade', (req, socket, head) => {
+  if (req.url === '/ws/logs') {
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit('connection', ws, req);
+    });
+  } else {
+    socket.destroy();
+  }
+});
+
+// Sunucuyu başlat
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`✅ Sunucu aktif. Port: ${PORT}`));
+
+// Botu başlat
 client.login(process.env['TOKEN']);

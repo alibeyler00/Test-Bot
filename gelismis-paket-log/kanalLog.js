@@ -1,4 +1,5 @@
 const { EmbedBuilder, PermissionsBitField, ChannelType } = require("discord.js");
+const logger = require("../utils/logger");
 
 module.exports = (client) => {
   const typeMap = {
@@ -14,12 +15,12 @@ module.exports = (client) => {
 
   client.on("channelCreate", async (channel) => {
     try {
-      console.debug("📥 [DEBUG] channelCreate eventi tetiklendi.");
+      logger.debug("📥 channelCreate eventi tetiklendi.");
 
       if (!channel.guild) return;
       const logChannel = getLogChannel(channel.guild);
       if (!logChannel) {
-        console.warn("⚠️ [WARN] Log kanalı bulunamadı.");
+        logger.warn("⚠️ Log kanalı bulunamadı.");
         return;
       }
 
@@ -34,20 +35,20 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log("✅ [LOG] Kanal oluşturma logu gönderildi.");
+      logger.log("✅ Kanal oluşturma logu gönderildi.");
     } catch (err) {
-      console.error("❌ [HATA] channelCreate log hatası:", err);
+      logger.error("❌ channelCreate log hatası:", err);
     }
   });
 
   client.on("channelDelete", async (channel) => {
     try {
-      console.debug("🗑️ [DEBUG] channelDelete eventi tetiklendi.");
+      logger.debug("🗑️ channelDelete eventi tetiklendi.");
 
       if (!channel.guild) return;
       const logChannel = getLogChannel(channel.guild);
       if (!logChannel) {
-        console.warn("⚠️ [WARN] Log kanalı bulunamadı.");
+        logger.warn("⚠️ Log kanalı bulunamadı.");
         return;
       }
 
@@ -62,20 +63,20 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log("✅ [LOG] Kanal silme logu gönderildi.");
+      logger.log("✅ Kanal silme logu gönderildi.");
     } catch (err) {
-      console.error("❌ [HATA] channelDelete log hatası:", err);
+      logger.error("❌ channelDelete log hatası:", err);
     }
   });
 
   client.on("channelUpdate", async (oldChannel, newChannel) => {
     try {
-      console.debug("🔧 [DEBUG] channelUpdate eventi tetiklendi.");
+      logger.debug("🔧 channelUpdate eventi tetiklendi.");
 
       if (!oldChannel.guild) return;
       const logChannel = getLogChannel(oldChannel.guild);
       if (!logChannel) {
-        console.warn("⚠️ [WARN] Log kanalı bulunamadı.");
+        logger.warn("⚠️ Log kanalı bulunamadı.");
         return;
       }
 
@@ -145,12 +146,12 @@ module.exports = (client) => {
 
       if (nameChanged || topicChanged || changedPerms.length > 0) {
         await logChannel.send({ embeds: [embed] });
-        console.log("✅ [LOG] Kanal güncelleme logu gönderildi.");
+        logger.log("✅ Kanal güncelleme logu gönderildi.");
       } else {
-        console.debug("ℹ️ [INFO] Önemli bir değişiklik yok, log atlanıyor.");
+        logger.info("ℹ️ Önemli bir değişiklik yok, log atlanıyor.");
       }
     } catch (err) {
-      console.error("❌ [HATA] channelUpdate log hatası:", err);
+      logger.error("❌ channelUpdate log hatası:", err);
     }
   });
 };

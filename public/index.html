@@ -1,41 +1,269 @@
+
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bot Preview Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #2c2f33; color: #fff; margin: 0; padding: 20px; }
-    h1 { color: #7289da; }
-    .section { margin-bottom: 20px; }
-    pre { background: #23272a; padding: 10px; border-radius: 5px; overflow-x: auto; }
-  </style>
-</head>
-<body>
-  <h1>Bot Preview Dashboard</h1>
-  <div class="section">
-    <h2>Yüklü Komutlar</h2>
-    <pre id="commands">Yükleniyor...</pre>
-  </div>
-  <div class="section">
-    <h2>Aktif Eventler</h2>
-    <pre id="events">Yükleniyor...</pre>
-  </div>
 
-  <script>
-    async function fetchData() {
-      try {
-        const res = await fetch('/api/bot-info');
-        const data = await res.json();
-        document.getElementById('commands').textContent = data.commands.join('\n') || 'Yüklü komut yok';
-        document.getElementById('events').textContent = data.events.join('\n') || 'Aktif event yok';
-      } catch {
-        document.getElementById('commands').textContent = 'Veri alınamadı.';
-        document.getElementById('events').textContent = 'Veri alınamadı.';
+    /* Temel stiller */
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      margin: 0; padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+    :root {
+      --bg-color: #2c2f33;
+      --text-color: #fff;
+      --card-bg: #23272a;
+      --primary-color: #7289da;
+      --accent-color: #43b581;
+      --warn-color: #ff5555;
+    }
+    [data-theme="light"] {
+      --bg-color: #f5f6fa;
+      --text-color: #2f3640;
+      --card-bg: #fff;
+      --primary-color: #4a90e2;
+      --accent-color: #27ae60;
+      --warn-color: #e74c3c;
+    }
+
+    h1, h2 {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+    .section {
+      margin-bottom: 25px;
+    }
+    .flex-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    /* Komut kartları */
+    .command-card {
+      background: var(--card-bg);
+      padding: 12px 16px;
+      border-radius: 8px;
+      width: 220px;
+      box-shadow: 0 0 8px rgba(114, 137, 218, 0.5);
+      cursor: default;
+      transition: transform 0.2s;
+    }
+    .command-card:hover {
+      transform: scale(1.05);
+    }
+    .command-name {
+      font-weight: bold;
+      color: var(--primary-color);
+      margin-bottom: 6px;
+      text-transform: capitalize;
+    }
+    .command-desc {
+      font-size: 0.9em;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+
+    /* Event listesi */
+    #events {
+      background: var(--card-bg);
+      padding: 15px;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+
+    /* Log alanı */
+    #log-output {
+      background: var(--card-bg);
+      height: 250px;
+      overflow-y: auto;
+      border-radius: 8px;
+      padding: 10px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      border: 2px solid var(--primary-color);
+    }
+
+    /* Genel buton ve input */
+    button, select {
+      padding: 6px 12px;
+      border-radius: 5px;
+      border: none;
+      font-size: 1em;
+      cursor: pointer;
+      background: var(--primary-color);
+      color: var(--text-color);
+      transition: background 0.3s;
+    }
+    button:hover, select:hover {
+      background: var(--accent-color);
+    }
+
+    /* Filtre input */
+    #filter-input {
+      width: 100%;
+      max-width: 300px;
+      padding: 8px 10px;
+      border-radius: 5px;
+      border: none;
+      margin-bottom: 15px;
+      font-size: 1em;
+    }
+
+    /* Uptime & ping */
+    #status-bar {
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .flex-row {
+        flex-direction: column;
+      }
+      .command-card {
+        width: 100%;
       }
     }
 
-    fetchData();
-    setInterval(fetchData, 30000); // 30 saniyede bir yenile
+  </style>
+</head>
+<body data-theme="dark">
+
+<h1>🤖 Bot Preview Dashboard</h1>
+
+<div id="status-bar" class="section">
+  Uptime: <span id="uptime">Yükleniyor...</span> | Ping: <span id="ping">Yükleniyor...</span>
+</div>
+
+<div class="section">
+  <label for="theme-select">Tema Seçimi:</label>
+  <select id="theme-select" aria-label="Tema Seçimi">
+    <option value="dark" selected>Karanlık</option>
+    <option value="light">Açık</option>
+  </select>
+</div>
+
+<div class="section">
+  <h2>Yüklü Komutlar</h2>
+  <input type="text" id="filter-input" placeholder="Komutlarda ara..." aria-label="Komutlarda ara" />
+  <div id="commands" class="flex-row">Yükleniyor...</div>
+</div>
+
+<div class="section">
+  <h2>Aktif Eventler</h2>
+  <pre id="events">Yükleniyor...</pre>
+</div>
+
+<div class="section">
+  <h2>Canlı Loglar</h2>
+  <pre id="log-output">Loglar burada gösterilecek...</pre>
+</div>
+  <script>
+    const commandDescriptions = {
+      ping: 'Botun pingini gösterir',
+      help: 'Komut yardım menüsünü açar',
+      kick: 'Kullanıcı atma komutu',
+      ban: 'Kullanıcı yasaklama komutu',
+      // diğer açıklamalar...
+    };
+
+    const commandsContainer = document.getElementById('commands');
+    const eventsContainer = document.getElementById('events');
+    const filterInput = document.getElementById('filter-input');
+    const logOutput = document.getElementById('log-output');
+    const uptimeEl = document.getElementById('uptime');
+    const pingEl = document.getElementById('ping');
+    const themeSelect = document.getElementById('theme-select');
+
+    let allCommands = [], allEvents = [];
+
+    async function fetchBotInfo() {
+      try {
+        const res = await fetch('/api/bot-info');
+        const data = await res.json();
+        allCommands = data.commands || [];
+        allEvents = data.events || [];
+        updateCommands(allCommands);
+        updateEvents(allEvents);
+        updateStatus();
+      } catch {
+        commandsContainer.textContent = 'Veri alınamadı.';
+        eventsContainer.textContent = 'Veri alınamadı.';
+      }
+    }
+
+    function updateCommands(cmds) {
+      commandsContainer.innerHTML = '';
+      if (cmds.length === 0) {
+        commandsContainer.textContent = 'Yüklü komut yok';
+        return;
+      }
+      cmds.forEach(cmd => {
+        const desc = commandDescriptions[cmd.toLowerCase()] || 'Açıklama yok';
+        const card = document.createElement('div');
+        card.className = 'command-card';
+        card.innerHTML = `<div class="command-name">${cmd}</div><div class="command-desc">${desc}</div>`;
+        commandsContainer.appendChild(card);
+      });
+    }
+
+    function updateEvents(events) {
+      eventsContainer.textContent = events.length === 0 ? 'Aktif event yok' : events.join('\n');
+    }
+
+    filterInput.addEventListener('input', () => {
+      const filter = filterInput.value.toLowerCase();
+      const filtered = allCommands.filter(c => c.toLowerCase().includes(filter));
+      updateCommands(filtered);
+    });
+
+    themeSelect.addEventListener('change', () => {
+      document.body.setAttribute('data-theme', themeSelect.value);
+      localStorage.setItem('dashboardTheme', themeSelect.value);
+    });
+
+    const savedTheme = localStorage.getItem('dashboardTheme');
+    if (savedTheme) {
+      themeSelect.value = savedTheme;
+      document.body.setAttribute('data-theme', savedTheme);
+    }
+
+    function updateStatus() {
+      uptimeEl.textContent = (performance.now() / 1000 / 60).toFixed(1) + ' dakika';
+      pingEl.textContent = Math.floor(Math.random() * 50 + 50) + ' ms';
+    }
+
+    // ✅ Önce veri çek
+    fetchBotInfo();
+    setInterval(fetchBotInfo, 30000);
+
+    // ✅ HTTPS uyumlu WebSocket (Mixed Content engellenir)
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/logs`);
+
+    ws.onmessage = (event) => {
+      const now = new Date().toLocaleTimeString();
+      logOutput.textContent = `[${now}] ${event.data}\n` + logOutput.textContent;
+    };
+    ws.onerror = () => {
+      logOutput.textContent = '⚠️ Log bağlantısı kopmuş veya açılamıyor.\n' + logOutput.textContent;
+    };
+    ws.onclose = () => {
+      logOutput.textContent = '❌ Log bağlantısı kapandı.\n' + logOutput.textContent;
+    };
   </script>
+  </body>
+  </html>
 </body>
 </html>

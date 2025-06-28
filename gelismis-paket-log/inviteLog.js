@@ -1,13 +1,14 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
+const logger = require('../utils/logger');
 
 module.exports = (client) => {
   client.on('inviteCreate', async (invite) => {
     try {
-      console.debug('🔧 [DEBUG] inviteCreate eventi tetiklendi.');
+      logger.debug('🔧 inviteCreate eventi tetiklendi.');
 
       const logChannel = invite.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -18,12 +19,12 @@ module.exports = (client) => {
         const entry = audit.entries.first();
         if (entry) {
           executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
-          console.debug(`✅ [INFO] Davet oluşturan yetkili: ${executor}`);
+          logger.debug(`✅ Davet oluşturan yetkili: ${executor}`);
         } else {
-          console.debug('ℹ️ [INFO] Daveti oluşturan kişi bulunamadı.');
+          logger.info('ℹ️ Daveti oluşturan kişi bulunamadı.');
         }
       } catch (err) {
-        console.warn('⚠️ [WARN] Denetim kayıtları alınamadı (inviteCreate):', err.message);
+        logger.warn('⚠️ Denetim kayıtları alınamadı (inviteCreate):', err.message);
       }
 
       const embed = new EmbedBuilder()
@@ -37,19 +38,19 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log('✅ [LOG] Davet oluşturma logu başarıyla gönderildi.');
+      logger.log('✅ Davet oluşturma logu başarıyla gönderildi.');
     } catch (err) {
-      console.error('❌ [HATA] inviteCreate log hatası:', err);
+      logger.error('❌ inviteCreate log hatası:', err);
     }
   });
 
   client.on('inviteDelete', async (invite) => {
     try {
-      console.debug('🔧 [DEBUG] inviteDelete eventi tetiklendi.');
+      logger.debug('🔧 inviteDelete eventi tetiklendi.');
 
       const logChannel = invite.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -60,12 +61,12 @@ module.exports = (client) => {
         const entry = audit.entries.first();
         if (entry) {
           executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
-          console.debug(`✅ [INFO] Davet silen yetkili: ${executor}`);
+          logger.debug(`✅ Davet silen yetkili: ${executor}`);
         } else {
-          console.debug('ℹ️ [INFO] Daveti silen kişi bulunamadı.');
+          logger.info('ℹ️ Daveti silen kişi bulunamadı.');
         }
       } catch (err) {
-        console.warn('⚠️ [WARN] Denetim kayıtları alınamadı (inviteDelete):', err.message);
+        logger.warn('⚠️ Denetim kayıtları alınamadı (inviteDelete):', err.message);
       }
 
       const embed = new EmbedBuilder()
@@ -79,9 +80,9 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log('✅ [LOG] Davet silme logu başarıyla gönderildi.');
+      logger.log('✅ Davet silme logu başarıyla gönderildi.');
     } catch (err) {
-      console.error('❌ [HATA] inviteDelete log hatası:', err);
+      logger.error('❌ inviteDelete log hatası:', err);
     }
   });
 };

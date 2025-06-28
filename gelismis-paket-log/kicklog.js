@@ -1,13 +1,14 @@
 const { AuditLogEvent, EmbedBuilder } = require('discord.js');
+const logger = require('../utils/logger');
 
 module.exports = (client) => {
   client.on('guildMemberRemove', async (member) => {
     try {
-      console.debug('🥾 [DEBUG] guildMemberRemove eventi tetiklendi.');
+      logger.debug('🥾 guildMemberRemove eventi tetiklendi.');
 
       const logChannel = member.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -22,25 +23,25 @@ module.exports = (client) => {
         if (entry) {
           const now = Date.now();
           const diff = now - entry.createdTimestamp;
-          console.debug(`🔍 [DEBUG] Denetim kaydı bulundu. Hedef: ${entry.target?.id}, Süre: ${diff}ms`);
+          logger.debug(`🔍 Denetim kaydı bulundu. Hedef: ${entry.target?.id}, Süre: ${diff}ms`);
 
           if (entry.target?.id === member.id && diff < 5000) {
             kicked = true;
             executor = entry.executor ? `${entry.executor.tag} (\`${entry.executor.id}\`)` : 'Bilinmiyor';
             reason = entry.reason || reason;
-            console.debug(`✅ [INFO] Kullanıcı atılmış (kick). Yetkili: ${executor}`);
+            logger.debug(`✅ Kullanıcı atılmış (kick). Yetkili: ${executor}`);
           } else {
-            console.debug('ℹ️ [INFO] Kullanıcı atılmamış gibi görünüyor.');
+            logger.info('ℹ️ Kullanıcı atılmamış gibi görünüyor.');
           }
         } else {
-          console.debug('ℹ️ [INFO] Kick denetim kaydı bulunamadı.');
+          logger.info('ℹ️ Kick denetim kaydı bulunamadı.');
         }
       } catch (err) {
-        console.warn('⚠️ [WARN] Denetim kayıtları alınamadı (kick kontrolü):', err.message);
+        logger.warn('⚠️ Denetim kayıtları alınamadı (kick kontrolü):', err.message);
       }
 
       if (!kicked) {
-        console.debug('ℹ️ [INFO] Kullanıcı kendi ayrılmış olabilir. Log gönderilmeyecek.');
+        logger.info('ℹ️ Kullanıcı kendi ayrılmış olabilir. Log gönderilmeyecek.');
         return;
       }
 
@@ -55,9 +56,9 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log('✅ [LOG] Kick logu başarıyla gönderildi.');
+      logger.log('✅ Kick logu başarıyla gönderildi.');
     } catch (err) {
-      console.error('❌ [HATA] guildMemberRemove (kick) log hatası:', err);
+      logger.error('❌ guildMemberRemove (kick) log hatası:', err);
     }
   });
 };

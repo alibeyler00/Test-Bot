@@ -1,9 +1,10 @@
 const { EmbedBuilder } = require('discord.js');
+const logger = require('../utils/logger');
 
 module.exports = (client) => {
   client.on('messageReactionAdd', async (reaction, user) => {
     try {
-      console.debug('➕ [DEBUG] messageReactionAdd eventi tetiklendi.');
+      logger.debug('➕ Reaksiyon eklendi eventi tetiklendi.');
 
       if (user.bot) return;
       const msg = reaction.message;
@@ -11,7 +12,7 @@ module.exports = (client) => {
 
       const logChannel = msg.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -26,15 +27,15 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log('✅ [LOG] Reaksiyon ekleme logu gönderildi.');
+      logger.log('✅ Reaksiyon ekleme logu başarıyla gönderildi.');
     } catch (err) {
-      console.error('❌ [HATA] messageReactionAdd log hatası:', err);
+      logger.error('❌ messageReactionAdd log hatası:', err);
     }
   });
 
   client.on('messageReactionRemove', async (reaction, user) => {
     try {
-      console.debug('➖ [DEBUG] messageReactionRemove eventi tetiklendi.');
+      logger.debug('➖ Reaksiyon kaldırıldı eventi tetiklendi.');
 
       if (user.bot) return;
       const msg = reaction.message;
@@ -42,7 +43,7 @@ module.exports = (client) => {
 
       const logChannel = msg.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -57,9 +58,9 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log('✅ [LOG] Reaksiyon kaldırma logu gönderildi.');
+      logger.log('✅ Reaksiyon kaldırma logu başarıyla gönderildi.');
     } catch (err) {
-      console.error('❌ [HATA] messageReactionRemove log hatası:', err);
+      logger.error('❌ messageReactionRemove log hatası:', err);
     }
   });
 };

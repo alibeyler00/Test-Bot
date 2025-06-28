@@ -1,13 +1,14 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
+const logger = require('../utils/logger'); // Logger dosyan
 
 module.exports = (client) => {
   client.on('guildBanAdd', async (ban) => {
     try {
-      console.debug('🔧 [DEBUG] guildBanAdd eventi tetiklendi.');
+      logger.debug('🔧 guildBanAdd eventi tetiklendi.');
 
       const logChannel = ban.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -15,18 +16,18 @@ module.exports = (client) => {
       let reason = ban.reason || 'Sebep belirtilmemiş';
 
       try {
-        console.debug('🔍 [DEBUG] Ban ekleme için denetim kayıtları çekiliyor...');
+        logger.debug('🔍 Ban ekleme için denetim kayıtları çekiliyor...');
         const audit = await ban.guild.fetchAuditLogs({ type: AuditLogEvent.MemberBanAdd, limit: 1 });
         const entry = audit.entries.find(e => e.target.id === ban.user.id);
         if (entry) {
           executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
           reason = entry.reason || reason;
-          console.debug(`✅ [INFO] Yetkili bulundu: ${executor}, Sebep: ${reason}`);
+          logger.debug(`✅ Yetkili bulundu: ${executor}, Sebep: ${reason}`);
         } else {
-          console.debug('ℹ️ [INFO] Ban yetkilisi bulunamadı.');
+          logger.info('ℹ️ Ban yetkilisi bulunamadı.');
         }
       } catch (err) {
-        console.warn('⚠️ [WARN] Ban denetim kayıtları alınamadı:', err.message);
+        logger.warn('⚠️ Ban denetim kayıtları alınamadı:', err.message);
       }
 
       const embed = new EmbedBuilder()
@@ -43,36 +44,36 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log('✅ [LOG] Ban ekleme logu başarıyla gönderildi.');
+      logger.log('✅ Ban ekleme logu başarıyla gönderildi.');
     } catch (err) {
-      console.error('❌ [HATA] guildBanAdd log hatası:', err);
+      logger.error('❌ guildBanAdd log hatası:', err);
     }
   });
 
   client.on('guildBanRemove', async (ban) => {
     try {
-      console.debug('🔧 [DEBUG] guildBanRemove eventi tetiklendi.');
+      logger.debug('🔧 guildBanRemove eventi tetiklendi.');
 
       const logChannel = ban.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
       let executor = 'Bilinmiyor';
 
       try {
-        console.debug('🔍 [DEBUG] Ban kaldırma için denetim kayıtları çekiliyor...');
+        logger.debug('🔍 Ban kaldırma için denetim kayıtları çekiliyor...');
         const audit = await ban.guild.fetchAuditLogs({ type: AuditLogEvent.MemberBanRemove, limit: 1 });
         const entry = audit.entries.find(e => e.target.id === ban.user.id);
         if (entry) {
           executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
-          console.debug(`✅ [INFO] Ban kaldırma yetkilisi bulundu: ${executor}`);
+          logger.debug(`✅ Ban kaldırma yetkilisi bulundu: ${executor}`);
         } else {
-          console.debug('ℹ️ [INFO] Ban kaldırma yetkilisi bulunamadı.');
+          logger.info('ℹ️ Ban kaldırma yetkilisi bulunamadı.');
         }
       } catch (err) {
-        console.warn('⚠️ [WARN] Ban kaldırma denetim kayıtları alınamadı:', err.message);
+        logger.warn('⚠️ Ban kaldırma denetim kayıtları alınamadı:', err.message);
       }
 
       const embed = new EmbedBuilder()
@@ -87,9 +88,9 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log('✅ [LOG] Ban kaldırma logu başarıyla gönderildi.');
+      logger.log('✅ Ban kaldırma logu başarıyla gönderildi.');
     } catch (err) {
-      console.error('❌ [HATA] guildBanRemove log hatası:', err);
+      logger.error('❌ guildBanRemove log hatası:', err);
     }
   });
 };

@@ -1,28 +1,29 @@
 const { EmbedBuilder } = require("discord.js");
+const logger = require("../utils/logger");
 
 module.exports = (client) => {
   client.on("messageDelete", async (msg) => {
     try {
-      console.debug("🗑️ [DEBUG] Mesaj silindi eventi tetiklendi.");
+      logger.debug("🗑️ Mesaj silindi eventi tetiklendi.");
 
       if (msg.partial) {
         try {
-          console.debug("🧩 [DEBUG] Mesaj partial, fetch ediliyor...");
+          logger.debug("🧩 Mesaj partial, fetch ediliyor...");
           await msg.fetch();
         } catch (err) {
-          console.warn("⚠️ [WARN] Mesaj fetch başarısız (muhtemelen silinmiş):", err.message);
+          logger.warn("⚠️ Mesaj fetch başarısız (muhtemelen silinmiş): " + err.message);
           return;
         }
       }
 
       if (!msg.guild || msg.author?.bot) {
-        console.debug("ℹ️ [INFO] Geçersiz sunucu veya bot mesajı, işlem iptal.");
+        logger.debug("ℹ️ Geçersiz sunucu veya bot mesajı, işlem iptal.");
         return;
       }
 
       const logChannel = msg.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn("⚠️ [WARN] Log kanalı bulunamadı.");
+        logger.warn("⚠️ Log kanalı bulunamadı.");
         return;
       }
 
@@ -46,40 +47,40 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log("✅ [LOG] Mesaj silme logu başarıyla gönderildi.");
+      logger.log("✅ Mesaj silme logu başarıyla gönderildi.");
     } catch (err) {
-      console.error("❌ [HATA] Mesaj silme log hatası:", err);
+      logger.error("❌ Mesaj silme log hatası:", err);
     }
   });
 
   client.on("messageUpdate", async (oldMsg, newMsg) => {
     try {
-      console.debug("✏️ [DEBUG] Mesaj güncelleme eventi tetiklendi.");
+      logger.debug("✏️ Mesaj güncelleme eventi tetiklendi.");
 
       if (oldMsg.partial || newMsg.partial) {
         try {
-          console.debug("🧩 [DEBUG] Partial mesaj tespit edildi, fetch ediliyor...");
+          logger.debug("🧩 Partial mesaj tespit edildi, fetch ediliyor...");
           if (oldMsg.partial) await oldMsg.fetch();
           if (newMsg.partial) await newMsg.fetch();
         } catch (err) {
-          console.warn("⚠️ [WARN] Mesaj fetch başarısız (muhtemelen silinmiş):", err.message);
+          logger.warn("⚠️ Mesaj fetch başarısız (muhtemelen silinmiş): " + err.message);
           return;
         }
       }
 
       if (!oldMsg.guild || oldMsg.author?.bot) {
-        console.debug("ℹ️ [INFO] Geçersiz sunucu veya bot mesajı, işlem iptal.");
+        logger.debug("ℹ️ Geçersiz sunucu veya bot mesajı, işlem iptal.");
         return;
       }
 
       if (oldMsg.content === newMsg.content) {
-        console.debug("🔍 [INFO] Mesaj içeriği değişmemiş, log gönderilmiyor.");
+        logger.info("🔍 Mesaj içeriği değişmemiş, log gönderilmiyor.");
         return;
       }
 
       const logChannel = oldMsg.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn("⚠️ [WARN] Log kanalı bulunamadı.");
+        logger.warn("⚠️ Log kanalı bulunamadı.");
         return;
       }
 
@@ -107,9 +108,9 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      console.log("✅ [LOG] Mesaj düzenleme logu başarıyla gönderildi.");
+      logger.log("✅ Mesaj düzenleme logu başarıyla gönderildi.");
     } catch (err) {
-      console.error("❌ [HATA] Mesaj düzenleme log hatası:", err);
+      logger.error("❌ Mesaj düzenleme log hatası:", err);
     }
   });
 };

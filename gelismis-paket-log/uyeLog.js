@@ -1,13 +1,14 @@
 const { EmbedBuilder } = require('discord.js');
+const logger = require('../utils/logger'); // Logger modül yolunu kendine göre düzenle
 
 module.exports = (client) => {
   client.on('guildMemberAdd', (member) => {
     try {
-      console.debug('🟢 [DEBUG] guildMemberAdd tetiklendi.');
+      logger.debug('🟢 [DEBUG] guildMemberAdd tetiklendi.');
 
       const logChannel = member.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        logger.warn('⚠️ [WARN] Log kanalı bulunamadı.');
         return;
       }
 
@@ -24,19 +25,19 @@ module.exports = (client) => {
         .setFooter({ text: `Sunucu: ${member.guild.name}` });
 
       logChannel.send({ embeds: [embed] });
-      console.log('✅ [LOG] Kullanıcı giriş logu gönderildi.');
+      logger.info('✅ [LOG] Kullanıcı giriş logu gönderildi.');
     } catch (err) {
-      console.error('❌ [HATA] Kullanıcı katılım log hatası:', err);
+      logger.error('❌ [HATA] Kullanıcı katılım log hatası:', err);
     }
   });
 
   client.on('guildMemberRemove', (member) => {
     try {
-      console.debug('🔴 [DEBUG] guildMemberRemove tetiklendi.');
+      logger.debug('🔴 [DEBUG] guildMemberRemove tetiklendi.');
 
       const logChannel = member.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
       if (!logChannel) {
-        console.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        logger.warn('⚠️ [WARN] Log kanalı bulunamadı.');
         return;
       }
 
@@ -57,9 +58,9 @@ module.exports = (client) => {
         .setFooter({ text: `Sunucu: ${member.guild.name}` });
 
       logChannel.send({ embeds: [embed] });
-      console.log('✅ [LOG] Kullanıcı çıkış logu gönderildi.');
+      logger.info('✅ [LOG] Kullanıcı çıkış logu gönderildi.');
     } catch (err) {
-      console.error('❌ [HATA] Kullanıcı ayrılma log hatası:', err);
+      logger.error('❌ [HATA] Kullanıcı ayrılma log hatası:', err);
     }
   });
 };
