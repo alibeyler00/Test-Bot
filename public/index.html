@@ -3,335 +3,483 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bot Preview Dashboard - Gelişmiş</title>
+<title>Logs Bot Dashboard - Modern Sidebar Tasarım</title>
 <style>
-  /* Reset ve temel ayarlar */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+  @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+  /* Reset */
   * {
     box-sizing: border-box;
   }
   body {
-    margin: 0; padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: var(--bg-color);
-    color: var(--text-color);
-    transition: background-color 0.4s ease, color 0.4s ease;
-  }
-  :root {
-    --bg-color: #1f2328;
-    --text-color: #e4e6eb;
-    --card-bg: #2c313a;
-    --primary-color: #5865f2;
-    --accent-color: #43b581;
-    --warn-color: #f04747;
-    --scrollbar-bg: #20252a;
-    --scrollbar-thumb: #5865f2;
-    --log-info: #43b581;
-    --log-warn: #f1c40f;
-    --log-error: #e74c3c;
-  }
-  [data-theme="light"] {
-    --bg-color: #f9fafb;
-    --text-color: #2f3336;
-    --card-bg: #ffffff;
-    --primary-color: #5865f2;
-    --accent-color: #43b581;
-    --warn-color: #f04747;
-    --scrollbar-bg: #e1e3e6;
-    --scrollbar-thumb: #5865f2;
-    --log-info: #27ae60;
-    --log-warn: #f39c12;
-    --log-error: #c0392b;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #f5f7fa;
+    color: #222;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* Scrollbar */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-track {
-    background: var(--scrollbar-bg);
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb);
-    border-radius: 10px;
+  body[data-theme="dark"] {
+    background: #121417;
+    color: #e4e6eb;
   }
 
-  /* Başlık */
-  h1 {
-    font-weight: 700;
-    font-size: 2.4rem;
-    margin-bottom: 25px;
-    color: var(--primary-color);
-    text-align: center;
+  /* Sidebar */
+  #sidebar {
+    width: 280px;
+    background: #5865f2;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    box-shadow: 3px 0 10px rgb(88 101 242 / 0.3);
+    position: relative;
   }
-  h2 {
-    font-weight: 600;
+
+  body[data-theme="dark"] #sidebar {
+    background: #4751d4;
+    box-shadow: 3px 0 15px rgb(67 181 129 / 0.5);
+  }
+
+  #sidebar h2 {
+    font-weight: 900;
+    font-size: 2.2rem;
     margin-bottom: 15px;
-    color: var(--primary-color);
+    user-select: none;
+    text-align: center;
+    letter-spacing: 1.5px;
+  }
+  /* Altında ince ayırıcı çizgi */
+  #sidebar h2::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: rgba(255 255 255 / 0.6);
+    margin: 8px auto 30px;
+    border-radius: 2px;
   }
 
-  /* Kutu sistemleri */
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
+  /* Sidebar Nav */
+  #nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
   }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
-    gap: 20px;
+  #nav li {
+    margin-bottom: 16px;
+  }
+  #nav button {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.15rem;
+    font-weight: 600;
+    padding: 14px 20px;
+    border-radius: 14px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    transition: background-color 0.3s ease, transform 0.15s ease;
+  }
+  /* İkon stili */
+  #nav button .material-icons {
+    font-size: 22px;
+    transition: color 0.3s ease;
+    flex-shrink: 0;
+  }
+  #nav button:hover {
+    background: rgba(255 255 255 / 0.25);
+    transform: scale(1.03);
+  }
+  #nav button.active {
+    background: rgba(255 255 255 / 0.3);
+    font-weight: 700;
+  }
+  /* Aktif butonun altına animasyonlu çizgi */
+  #nav button.active::after {
+    content: "";
+    position: absolute;
+    bottom: 6px;
+    left: 20px;
+    height: 3px;
+    width: calc(100% - 40px);
+    background: #fff;
+    border-radius: 2px;
+    animation: slideIn 0.35s ease forwards;
   }
 
-  /* Kartlar */
-  .card {
-    background: var(--card-bg);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgb(0 0 0 / 0.2);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  @keyframes slideIn {
+    from { width: 0; }
+    to { width: calc(100% - 40px); }
   }
-  .card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 25px rgb(88 101 242 / 0.4);
+
+  /* Tema seçici */
+  #theme-select-container {
+    margin-top: auto;
+    text-align: center;
+    user-select: none;
+  }
+  label[for="theme-select"] {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 10px;
+    color: white;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+  }
+  #theme-select {
+    padding: 12px 18px;
+    font-size: 1rem;
+    border-radius: 18px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    background: rgba(255 255 255 / 0.25);
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  #theme-select:hover,
+  #theme-select:focus {
+    background: rgba(255 255 255 / 0.4);
+    outline: none;
+  }
+
+  /* Main content */
+  #main {
+    flex-grow: 1;
+    background: #fff;
+    padding: 30px 40px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body[data-theme="dark"] #main {
+    background: #1f2328;
   }
 
   /* Status bar */
   #status-bar {
-    background: var(--card-bg);
-    padding: 15px 25px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-align: center;
-    margin-bottom: 25px;
-    color: var(--accent-color);
-    box-shadow: 0 4px 10px rgb(67 181 129 / 0.4);
-  }
-
-  /* Tema seçici */
-  #theme-select {
-    padding: 10px 15px;
-    font-size: 1rem;
-    border-radius: 8px;
-    border: none;
-    background: var(--primary-color);
+    background: #5865f2;
     color: white;
-    cursor: pointer;
-    box-shadow: 0 3px 6px rgb(88 101 242 / 0.5);
-    transition: background 0.3s ease;
-  }
-  #theme-select:hover {
-    background: var(--accent-color);
-  }
-  label[for="theme-select"] {
-    font-weight: 600;
-    color: var(--primary-color);
-  }
-
-  /* Komut arama input */
-  #filter-input {
-    width: 100%;
-    padding: 12px 15px;
-    font-size: 1rem;
-    border-radius: 10px;
-    border: none;
-    margin-bottom: 20px;
-    background: #3a3f4a;
-    color: var(--text-color);
-    box-shadow: inset 0 2px 5px rgb(0 0 0 / 0.4);
-    transition: background 0.3s ease;
-  }
-  #filter-input::placeholder {
-    color: #b0b3b8;
-  }
-  #filter-input:focus {
-    outline: none;
-    background: #50575f;
-  }
-
-  /* Komut kartları (accordion) */
-  .command-card {
-    background: #404652;
-    border-radius: 10px;
-    box-shadow: 0 0 6px rgb(67 181 129 / 0.5);
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    margin-bottom: 10px;
-    overflow: hidden;
-  }
-  .command-card:hover {
-    transform: scale(1.03);
-  }
-  .command-header {
-    padding: 15px 20px;
     font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--accent-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    font-size: 1.2rem;
+    border-radius: 14px;
+    padding: 15px 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 6px 20px rgb(88 101 242 / 0.45);
     user-select: none;
-  }
-  .command-desc {
-    font-size: 0.9rem;
-    opacity: 0.85;
-    color: var(--text-color);
-    padding: 0 20px 15px;
-    line-height: 1.3;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-  }
-  .command-card.active .command-desc {
-    max-height: 200px;
-  }
-  .toggle-icon {
-    transition: transform 0.3s ease;
-  }
-  .command-card.active .toggle-icon {
-    transform: rotate(90deg);
+    max-width: 400px;
   }
 
-  /* Event listesi sade */
-  #events {
-    background: var(--card-bg);
-    padding: 15px 20px;
-    border-radius: 12px;
-    max-height: 250px;
+  body[data-theme="dark"] #status-bar {
+    background: #43b581;
+    box-shadow: 0 6px 20px rgb(67 181 129 / 0.7);
+  }
+
+  /* Content sections */
+  .content-section {
+    display: none;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+  }
+
+  .content-section.active {
+    display: flex;
+  }
+
+  /* Search inputs */
+  .search-input {
+    padding: 12px 18px;
+    font-size: 1rem;
+    border-radius: 14px;
+    border: 1.5px solid #ced4da;
+    box-shadow: inset 0 3px 7px rgba(0,0,0,0.06);
+    margin-bottom: 25px;
+    max-width: 480px;
+    transition: border-color 0.3s ease;
+  }
+  .search-input:focus {
+    outline: none;
+    border-color: #5865f2;
+    box-shadow: 0 0 10px rgba(88,101,242,0.5);
+    background: #fff;
+  }
+  body[data-theme="dark"] .search-input {
+    background: #2a2f3a;
+    border-color: #4a4f5d;
+    color: #ddd;
+  }
+  body[data-theme="dark"] .search-input:focus {
+    background: #303646;
+    border-color: #43b581;
+  }
+
+  /* Commands list */
+  #commands-list {
+    flex-grow: 1;
     overflow-y: auto;
+  }
+  .command-item {
+    background: #f1f3f5;
+    padding: 18px 22px;
+    margin-bottom: 14px;
+    border-radius: 14px;
+    box-shadow: 0 4px 8px rgb(0 0 0 / 0.08);
+    cursor: default;
+    transition: background-color 0.3s ease;
+  }
+  .command-item:hover {
+    background: #e2e6f0;
+  }
+  body[data-theme="dark"] .command-item {
+    background: #2c313a;
+    box-shadow: 0 4px 10px rgb(67 181 129 / 0.15);
+    color: #d0d4dd;
+  }
+  body[data-theme="dark"] .command-item:hover {
+    background: #3a4050;
+  }
+  .command-item h3 {
+    margin: 0;
+    font-weight: 700;
+    color: #5865f2;
+  }
+  body[data-theme="dark"] .command-item h3 {
+    color: #43b581;
+  }
+  .command-item p {
+    margin: 6px 0 0 0;
+    font-weight: 500;
+    color: #555;
+  }
+  body[data-theme="dark"] .command-item p {
+    color: #aab3cf;
+  }
+
+  /* Events list */
+  #events-list {
     font-family: 'Courier New', Courier, monospace;
-    box-shadow: inset 0 0 10px rgb(88 101 242 / 0.25);
-    color: var(--accent-color);
+    background: #f9fafb;
+    padding: 20px 25px;
+    border-radius: 14px;
+    height: 100%;
+    overflow-y: auto;
+    box-shadow: inset 0 0 15px rgba(88, 101, 242, 0.12);
+    color: #5865f2;
+    font-weight: 700;
+  }
+  body[data-theme="dark"] #events-list {
+    background: #1f2328;
+    color: #43b581;
+    box-shadow: inset 0 0 15px rgba(67, 181, 129, 0.35);
   }
   .event-item {
-    border-bottom: 1px solid rgba(255 255 255 / 0.1);
-    padding: 8px 0;
-    font-weight: 600;
-    user-select: none;
+    padding: 12px 0;
+    border-bottom: 1px solid #dde1e7;
+  }
+  body[data-theme="dark"] .event-item {
+    border-bottom: 1px solid rgba(67, 181, 129, 0.25);
   }
 
-  /* Log ekranı */
-  #log-container {
-    position: relative;
-    background: var(--card-bg);
-    border-radius: 12px;
-    height: 300px;
-    box-shadow: inset 0 0 12px rgb(67 181 129 / 0.3);
-    border-left: 6px solid var(--accent-color);
-    color: var(--accent-color);
-    font-weight: 600;
-    font-family: monospace;
+  /* Logs */
+  #logs-container {
     display: flex;
     flex-direction: column;
-  }
-  #log-output {
-    flex-grow: 1;
-    padding: 15px 20px;
-    overflow-y: auto;
-    white-space: pre-wrap;
+    height: 100%;
   }
   #log-filter {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    margin: 10px 20px;
-    font-size: 0.9rem;
-    background: #3a3f4a;
-    color: var(--text-color);
-    box-shadow: inset 0 2px 5px rgb(0 0 0 / 0.4);
-  }
-  #log-filter::placeholder {
-    color: #b0b3b8;
+    padding: 12px 18px;
+    border-radius: 14px;
+    border: 1.5px solid #ced4da;
+    margin-bottom: 20px;
+    font-size: 1rem;
+    box-shadow: inset 0 3px 7px rgba(0,0,0,0.06);
+    max-width: 480px;
+    transition: border-color 0.3s ease;
   }
   #log-filter:focus {
     outline: none;
-    background: #50575f;
+    border-color: #5865f2;
+    box-shadow: 0 0 12px rgba(88,101,242,0.5);
+    background: #fff;
   }
+  body[data-theme="dark"] #log-filter {
+    background: #2a2f3a;
+    border-color: #4a4f5d;
+    color: #ccc;
+  }
+  body[data-theme="dark"] #log-filter:focus {
+    background: #303646;
+    border-color: #43b581;
+  }
+
   #log-clear-btn {
-    position: absolute;
-    top: 12px;
-    right: 15px;
-    background: var(--warn-color);
-    border: none;
-    border-radius: 8px;
+    align-self: flex-start;
+    padding: 10px 22px;
+    background: #f04747;
     color: white;
-    padding: 6px 12px;
+    border: none;
+    border-radius: 14px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgb(224 67 67 / 0.8);
+    box-shadow: 0 3px 12px rgb(224 67 67 / 0.8);
     transition: background 0.3s ease;
-    z-index: 10;
+    margin-bottom: 10px;
   }
   #log-clear-btn:hover {
     background: #c0392b;
   }
 
-  /* Log satırları türlerine göre renk */
-  .log-line {
-    margin-bottom: 5px;
-    padding: 2px 5px;
-    border-radius: 4px;
+  #log-output {
+    flex-grow: 1;
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px 25px;
+    font-family: monospace;
+    font-weight: 600;
+    color: #111;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    box-shadow: 0 0 30px rgb(88 101 242 / 0.15);
   }
-  .log-info {
-    color: var(--log-info);
-  }
-  .log-warn {
-    color: var(--log-warn);
-  }
-  .log-error {
-    color: var(--log-error);
+  body[data-theme="dark"] #log-output {
+    background: #1f2328;
+    color: #43b581;
+    box-shadow: 0 0 35px rgb(67 181 129 / 0.45);
   }
 
-  /* Responsive grid (1 sütun dar ekran) */
-  @media (max-width: 600px) {
-    .grid {
-      grid-template-columns: 1fr !important;
+  /* Log satırları */
+  .log-line {
+    margin-bottom: 6px;
+    padding: 3px 7px;
+    border-radius: 7px;
+    font-size: 0.9rem;
+  }
+  .log-info {
+    color: #43b581;
+  }
+  .log-warn {
+    color: #f1c40f;
+  }
+  .log-error {
+    color: #e74c3c;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    body {
+      flex-direction: column;
     }
-    #log-container {
-      height: 250px;
+    #sidebar {
+      width: 100%;
+      flex-direction: row;
+      padding: 15px 20px;
+      overflow-x: auto;
+      box-shadow: none;
+    }
+    #sidebar h2 {
+      margin: 0 20px 0 0;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    #nav {
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      flex-grow: 1;
+      overflow-x: auto;
+    }
+    #nav li {
+      margin: 0;
+    }
+    #nav button {
+      padding: 10px 16px;
+      font-size: 1rem;
+      border-radius: 10px;
+      justify-content: center;
+    }
+    #nav button .material-icons {
+      display: none;
+    }
+    #theme-select-container {
+      margin-left: 20px;
+      margin-top: 0;
+      flex-shrink: 0;
+    }
+    #main {
+      height: auto;
+      padding: 20px 20px 40px;
+    }
+    .content-section {
+      height: auto;
     }
   }
 </style>
 </head>
 <body data-theme="dark">
 
-  <h1>🤖 Logs Bot Dashboard</h1>
-
-  <div class="container">
-    <div id="status-bar">Uptime: <span id="uptime">Yükleniyor...</span> | Ping: <span id="ping">Yükleniyor...</span></div>
-
-    <div style="margin-bottom: 30px; text-align: center;">
-      <label for="theme-select">Tema Seçimi: </label>
+  <aside id="sidebar" role="navigation" aria-label="Ana Menü">
+    <h2>Logs Dashboard</h2>
+    <ul id="nav" role="tablist" aria-label="Menü">
+      <li><button role="tab" aria-selected="true" id="tab-commands" aria-controls="commands-section" class="active">
+        <span class="material-icons" aria-hidden="true">settings</span> Komutlar
+      </button></li>
+      <li><button role="tab" aria-selected="false" id="tab-events" aria-controls="events-section">
+        <span class="material-icons" aria-hidden="true">event</span> Eventler
+      </button></li>
+      <li><button role="tab" aria-selected="false" id="tab-logs" aria-controls="logs-section">
+        <span class="material-icons" aria-hidden="true">article</span> Loglar
+      </button></li>
+    </ul>
+    <div id="theme-select-container">
+      <label for="theme-select">Tema</label>
       <select id="theme-select" aria-label="Tema Seçimi">
         <option value="dark" selected>Karanlık</option>
         <option value="light">Açık</option>
       </select>
     </div>
+  </aside>
 
-    <div class="grid">
-      <section class="card">
-        <h2>Yüklü Komutlar</h2>
-        <input type="text" id="filter-input" placeholder="Komutlarda ara..." aria-label="Komutlarda ara" />
-        <div id="commands">Yükleniyor...</div>
-      </section>
-
-      <section class="card">
-        <h2>Aktif Eventler</h2>
-        <div id="events">Yükleniyor...</div>
-      </section>
-
-      <section class="card" style="grid-column: span 2;">
-        <h2>Canlı Loglar</h2>
-        <div id="log-container">
-          <input id="log-filter" placeholder="Loglarda ara..." aria-label="Loglarda ara" />
-          <button id="log-clear-btn" title="Logları temizle">Temizle</button>
-          <pre id="log-output">Loglar burada gösterilecek...</pre>
-        </div>
-      </section>
+  <main id="main">
+    <div id="status-bar" role="status" aria-live="polite">
+      Uptime: <span id="uptime">Yükleniyor...</span> | Ping: <span id="ping">Yükleniyor...</span>
     </div>
-  </div>
+
+    <!-- Komutlar -->
+    <section id="commands-section" class="content-section active" role="tabpanel" aria-labelledby="tab-commands">
+      <input type="search" id="filter-input" class="search-input" placeholder="Komutlarda ara..." aria-label="Komutlarda ara" autocomplete="off" />
+      <div id="commands-list" aria-live="polite">Yükleniyor...</div>
+    </section>
+
+    <!-- Eventler -->
+    <section id="events-section" class="content-section" role="tabpanel" aria-labelledby="tab-events" tabindex="0">
+      <div id="events-list">Yükleniyor...</div>
+    </section>
+
+    <!-- Loglar -->
+    <section id="logs-section" class="content-section" role="tabpanel" aria-labelledby="tab-logs" tabindex="0">
+      <div id="logs-container">
+        <input type="search" id="log-filter" class="search-input" placeholder="Loglarda ara..." aria-label="Loglarda ara" autocomplete="off" />
+        <button id="log-clear-btn" title="Logları temizle" aria-label="Logları temizle">Temizle</button>
+        <pre id="log-output" aria-live="polite" aria-atomic="false">Loglar burada gösterilecek...</pre>
+      </div>
+    </section>
+  </main>
 
 <script>
+  // Veri objesi ve containerlar
   const commandDescriptions = {
     ping: 'Botun pingini gösterir',
     help: 'Komut yardım menüsünü açar',
@@ -340,8 +488,8 @@
     // diğer açıklamalar...
   };
 
-  const commandsContainer = document.getElementById('commands');
-  const eventsDiv = document.getElementById('events');
+  const commandsList = document.getElementById('commands-list');
+  const eventsList = document.getElementById('events-list');
   const filterInput = document.getElementById('filter-input');
   const logOutput = document.getElementById('log-output');
   const logFilterInput = document.getElementById('log-filter');
@@ -350,104 +498,141 @@
   const pingEl = document.getElementById('ping');
   const themeSelect = document.getElementById('theme-select');
 
+  const tabs = {
+    commands: document.getElementById('tab-commands'),
+    events: document.getElementById('tab-events'),
+    logs: document.getElementById('tab-logs'),
+  };
+  const sections = {
+    commands: document.getElementById('commands-section'),
+    events: document.getElementById('events-section'),
+    logs: document.getElementById('logs-section'),
+  };
+
   let allCommands = [], allEvents = [], allLogs = [];
 
-  // --- Komut accordion aç/kapa ---
-  function setupCommandAccordion() {
-    const cards = document.querySelectorAll('.command-card');
-    cards.forEach(card => {
-      card.onclick = () => {
-        card.classList.toggle('active');
-      };
-    });
-  }
-
-  // --- Eventleri sade liste olarak render et ---
-  function renderEvents(events) {
-    if (!events || events.length === 0) {
-      eventsDiv.innerHTML = '<p>Aktif event yok</p>';
-      return;
+  // Tab kontrol fonksiyonu
+  function switchTab(tabKey) {
+    for (const key in tabs) {
+      const selected = (key === tabKey);
+      tabs[key].classList.toggle('active', selected);
+      tabs[key].setAttribute('aria-selected', selected);
+      sections[key].classList.toggle('active', selected);
+      if (selected) sections[key].focus();
     }
-    eventsDiv.innerHTML = ''; // temizle
-
-    events.forEach(event => {
-      const evDiv = document.createElement('div');
-      evDiv.className = 'event-item';
-      evDiv.textContent = event;
-      eventsDiv.appendChild(evDiv);
-    });
   }
 
-  // --- Komutları render et ---
-  function updateCommands(cmds) {
-    commandsContainer.innerHTML = '';
-    if (cmds.length === 0) {
-      commandsContainer.textContent = 'Yüklü komut yok';
+  // Komutları render et
+  function renderCommands(cmds) {
+    commandsList.innerHTML = '';
+    if (!cmds.length) {
+      commandsList.textContent = 'Yüklü komut yok';
       return;
     }
     cmds.forEach(cmd => {
       const desc = commandDescriptions[cmd.toLowerCase()] || 'Açıklama yok';
-      const card = document.createElement('div');
-      card.className = 'command-card';
-      card.innerHTML = `
-        <div class="command-header">
-          <span>${cmd}</span>
-          <span class="toggle-icon">▶</span>
-        </div>
-        <div class="command-desc">${desc}</div>
-      `;
-      commandsContainer.appendChild(card);
+      const div = document.createElement('div');
+      div.className = 'command-item';
+      div.innerHTML = `<h3>${cmd}</h3><p>${desc}</p>`;
+      commandsList.appendChild(div);
     });
-    setupCommandAccordion();
   }
 
-  // --- Bot bilgisini API'dan çek ---
+  // Eventleri render et
+  function renderEvents(events) {
+    if (!events.length) {
+      eventsList.innerHTML = '<p>Aktif event yok</p>';
+      return;
+    }
+    eventsList.innerHTML = '';
+    events.forEach(ev => {
+      const div = document.createElement('div');
+      div.className = 'event-item';
+      div.textContent = ev;
+      eventsList.appendChild(div);
+    });
+  }
+
+  // Status güncelle
+  function updateStatus() {
+    uptimeEl.textContent = (performance.now() / 1000 / 60).toFixed(1) + ' dakika';
+    pingEl.textContent = Math.floor(Math.random() * 50 + 50) + ' ms';
+  }
+
+  // Log ekle
+  function addLogLine(text, type='info') {
+    const div = document.createElement('div');
+    div.className = 'log-line';
+    if(type==='warn') div.classList.add('log-warn');
+    else if(type==='error') div.classList.add('log-error');
+    else div.classList.add('log-info');
+    div.textContent = text;
+
+    allLogs.unshift(div);
+    if(allLogs.length > 1000) allLogs.pop();
+    renderLogs();
+  }
+
+  // Logları render et
+  function renderLogs() {
+    const filter = logFilterInput.value.toLowerCase();
+    logOutput.innerHTML = '';
+    allLogs.forEach(log => {
+      if(log.textContent.toLowerCase().includes(filter)) {
+        logOutput.appendChild(log);
+      }
+    });
+  }
+
+  // Bot bilgisini çek
   async function fetchBotInfo() {
     try {
       const res = await fetch('/api/bot-info');
       const data = await res.json();
       allCommands = data.commands || [];
       allEvents = data.events || [];
-      updateCommands(allCommands);
+      renderCommands(allCommands);
       renderEvents(allEvents);
       updateStatus();
-    } catch {
-      commandsContainer.textContent = 'Veri alınamadı.';
-      eventsDiv.innerHTML = 'Veri alınamadı.';
+    } catch(e) {
+      commandsList.textContent = 'Veri alınamadı.';
+      eventsList.innerHTML = 'Veri alınamadı.';
     }
   }
 
-  // --- Uptime & Ping güncelle ---
-  function updateStatus() {
-    uptimeEl.textContent = (performance.now() / 1000 / 60).toFixed(1) + ' dakika';
-    pingEl.textContent = Math.floor(Math.random() * 50 + 50) + ' ms';
-  }
+  // Tab butonlarına event
+  Object.entries(tabs).forEach(([key, btn]) => {
+    btn.addEventListener('click', () => switchTab(key));
+  });
 
-  // --- Log ekleme ---
-  function addLogLine(text, type = 'info') {
-    const div = document.createElement('div');
-    div.classList.add('log-line');
-    if (type === 'warn') div.classList.add('log-warn');
-    else if (type === 'error') div.classList.add('log-error');
-    else div.classList.add('log-info');
-    div.textContent = text;
-    allLogs.unshift(div);
-    if (allLogs.length > 1000) allLogs.pop();
+  // Arama filtreleri
+  filterInput.addEventListener('input', () => {
+    const filter = filterInput.value.toLowerCase();
+    const filtered = allCommands.filter(c => c.toLowerCase().includes(filter));
+    renderCommands(filtered);
+  });
+  logFilterInput.addEventListener('input', renderLogs);
+
+  // Log temizle
+  logClearBtn.addEventListener('click', () => {
+    allLogs = [];
     renderLogs();
+  });
+
+  // Tema seçimi
+  themeSelect.addEventListener('change', () => {
+    document.body.setAttribute('data-theme', themeSelect.value);
+    localStorage.setItem('dashboardTheme', themeSelect.value);
+  });
+
+  // Kaydedilmiş tema varsa uygula
+  const savedTheme = localStorage.getItem('dashboardTheme');
+  if (savedTheme) {
+    themeSelect.value = savedTheme;
+    document.body.setAttribute('data-theme', savedTheme);
   }
 
-  // --- Logları filtrele ve göster ---
-  function renderLogs() {
-    const filter = logFilterInput.value.toLowerCase();
-    logOutput.innerHTML = '';
-    allLogs.forEach(logEl => {
-      if (logEl.textContent.toLowerCase().includes(filter)) {
-        logOutput.appendChild(logEl);
-      }
-    });
-  }
-
-  // --- WebSocket bağlantısı ---
+  // WebSocket log bağlantısı
   const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
   const ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/logs`);
 
@@ -461,39 +646,10 @@
 
     addLogLine(`[${now}] ${data}`, type);
   };
-  ws.onerror = () => {
-    addLogLine('⚠️ Log bağlantısı kopmuş veya açılamıyor.', 'warn');
-  };
-  ws.onclose = () => {
-    addLogLine('❌ Log bağlantısı kapandı.', 'error');
-  };
+  ws.onerror = () => addLogLine('⚠️ Log bağlantısı kopmuş veya açılamıyor.', 'warn');
+  ws.onclose = () => addLogLine('❌ Log bağlantısı kapandı.', 'error');
 
-  // --- Event listenerlar ---
-  filterInput.addEventListener('input', () => {
-    const filter = filterInput.value.toLowerCase();
-    const filtered = allCommands.filter(c => c.toLowerCase().includes(filter));
-    updateCommands(filtered);
-  });
-  logFilterInput.addEventListener('input', renderLogs);
-
-  logClearBtn.addEventListener('click', () => {
-    allLogs = [];
-    renderLogs();
-  });
-
-  themeSelect.addEventListener('change', () => {
-    document.body.setAttribute('data-theme', themeSelect.value);
-    localStorage.setItem('dashboardTheme', themeSelect.value);
-  });
-
-  // --- Kaydedilmiş tema varsa uygula ---
-  const savedTheme = localStorage.getItem('dashboardTheme');
-  if (savedTheme) {
-    themeSelect.value = savedTheme;
-    document.body.setAttribute('data-theme', savedTheme);
-  }
-
-  // --- İlk veri yükle ---
+  // İlk yükleme ve periyodik yenileme
   fetchBotInfo();
   setInterval(fetchBotInfo, 30000);
 </script>
