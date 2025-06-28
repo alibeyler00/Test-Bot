@@ -54,7 +54,19 @@ fs.readdirSync(GelismisPaketYolu).forEach((file) => {
 
 const express = require('express');
 const app = express();
-app.get('/', (req, res) => res.send('Bot Aktif!'));
-app.listen(3000, () => console.log('Uptime sistemi aktif.'));
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+
+app.get('/api/bot-info', (req, res) => {
+  const commands = client.commands ? Array.from(client.commands.keys()) : [];
+  const events = client.eventNames ? client.eventNames() : [];
+
+  res.json({ commands, events });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Uptime sistemi aktif. Port: ${PORT}`));
 
 client.login(process.env['TOKEN']);

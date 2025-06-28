@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bot Preview Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #2c2f33; color: #fff; margin: 0; padding: 20px; }
+    h1 { color: #7289da; }
+    .section { margin-bottom: 20px; }
+    pre { background: #23272a; padding: 10px; border-radius: 5px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Bot Preview Dashboard</h1>
+  <div class="section">
+    <h2>Yüklü Komutlar</h2>
+    <pre id="commands">Yükleniyor...</pre>
+  </div>
+  <div class="section">
+    <h2>Aktif Eventler</h2>
+    <pre id="events">Yükleniyor...</pre>
+  </div>
+
+  <script>
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/bot-info');
+        const data = await res.json();
+        document.getElementById('commands').textContent = data.commands.join('\n') || 'Yüklü komut yok';
+        document.getElementById('events').textContent = data.events.join('\n') || 'Aktif event yok';
+      } catch {
+        document.getElementById('commands').textContent = 'Veri alınamadı.';
+        document.getElementById('events').textContent = 'Veri alınamadı.';
+      }
+    }
+
+    fetchData();
+    setInterval(fetchData, 30000); // 30 saniyede bir yenile
+  </script>
+</body>
+</html>
