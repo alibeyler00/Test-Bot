@@ -67,14 +67,25 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/bot-info', (req, res) => {
-  const commands = [];
+  const commands = []; // Eğer varsa komutları doldur
   const events = client._loadedEvents || [];
+
+  // Sunucu bilgisini ekle
+  const servers = client.guilds.cache.map(guild => ({
+    id: guild.id,
+    name: guild.name,
+    memberCount: guild.memberCount,
+    iconURL: guild.iconURL({ dynamic: true, size: 128 }) || null,
+  }));
 
   console.log(">> API İSTEĞİ /api/bot-info");
   console.log(">> Yüklü Eventler:", events);
+  console.log(">> Sunucular:", servers);
 
-  res.json({ commands, events });
+  res.json({ commands, events, servers });
 });
+
+
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ noServer: true });
