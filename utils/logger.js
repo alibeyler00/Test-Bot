@@ -9,7 +9,6 @@ function formatLog(level, ...args) {
 function logToConsoleAndWS(level, ...args) {
   const formatted = formatLog(level, ...args);
 
-  // Renk olmadan sadece normal log:
   switch (level) {
     case 'debug':
       console.debug(formatted);

@@ -1,5 +1,5 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const logger = require('../utils/logger'); // Logger dosyan
+const logger = require('../utils/logger');
 
 module.exports = (client) => {
   client.on('guildBanAdd', async (ban) => {

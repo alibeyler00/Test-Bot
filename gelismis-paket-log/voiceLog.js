@@ -1,5 +1,5 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const logger = require('../utils/logger'); // Logger dosya yolunu kendi yapına göre düzenle
+const logger = require('../utils/logger'); 
 
 module.exports = (client) => {
   client.on('voiceStateUpdate', async (oldState, newState) => {
@@ -12,7 +12,6 @@ module.exports = (client) => {
         .setAuthor({ name: user.tag, iconURL: user.displayAvatarURL() })
         .setTimestamp();
 
-      // Kanal katılım
       if (!oldState.channelId && newState.channelId) {
         embed
           .setTitle('🔊 Ses Kanalına Katıldı')
@@ -27,7 +26,6 @@ module.exports = (client) => {
         return;
       }
 
-      // Kanal ayrılma
       if (oldState.channelId && !newState.channelId) {
         embed
           .setTitle('🔈 Ses Kanalından Ayrıldı')
@@ -42,7 +40,6 @@ module.exports = (client) => {
         return;
       }
 
-      // Kanal değiştirme
       if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
         embed
           .setTitle('🔄 Ses Kanalı Değiştirildi')
@@ -58,7 +55,6 @@ module.exports = (client) => {
         return;
       }
 
-      // Mikrofon açma/kapatma
       if (oldState.selfMute !== newState.selfMute) {
         embed
           .setTitle('🎙️ Mikrofon Durumu Değişti')
@@ -73,7 +69,6 @@ module.exports = (client) => {
         return;
       }
 
-      // Kulaklık açma/kapatma (Deafen)
       if (oldState.selfDeaf !== newState.selfDeaf) {
         embed
           .setTitle('🎧 Kulaklık Durumu Değişti')
@@ -88,7 +83,6 @@ module.exports = (client) => {
         return;
       }
 
-      // Sunucu bazlı mute/deafen değişimi (admin mute)
       if (oldState.serverMute !== newState.serverMute) {
         embed
           .setTitle('🔇 Sunucu Mikrofon Durumu Değişti')

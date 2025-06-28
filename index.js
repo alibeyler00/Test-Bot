@@ -59,17 +59,15 @@ registerEventsFrom(path.join(__dirname, 'kolay-paket-log'));
 registerEventsFrom(path.join(__dirname, 'orta-paket-log'));
 registerEventsFrom(path.join(__dirname, 'gelismis-paket-log'));
 
-// Express + WebSocket server
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Ana sayfa
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.get('/api/bot-info', (req, res) => {
-  const commands = []; // Komut sistemin yoksa boş
+  const commands = [];
   const events = client._loadedEvents || [];
 
   console.log(">> API İSTEĞİ /api/bot-info");
@@ -78,7 +76,6 @@ app.get('/api/bot-info', (req, res) => {
   res.json({ commands, events });
 });
 
-// WebSocket server
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ noServer: true });
 
@@ -97,9 +94,7 @@ server.on('upgrade', (req, socket, head) => {
   }
 });
 
-// Sunucuyu başlat
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => console.log(`✅ Sunucu aktif. Port: ${PORT}`));
 
-// Botu başlat
 client.login(process.env['TOKEN']);

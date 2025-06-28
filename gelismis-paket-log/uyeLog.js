@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const logger = require('../utils/logger'); // Logger modül yolunu kendine göre düzenle
+const logger = require('../utils/logger'); 
 
 module.exports = (client) => {
   client.on('guildMemberAdd', (member) => {

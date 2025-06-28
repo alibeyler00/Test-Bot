@@ -8,7 +8,6 @@
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
   @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-  /* Reset */
   * {
     box-sizing: border-box;
   }
@@ -28,7 +27,6 @@
     color: #e4e6eb;
   }
 
-  /* Sidebar */
   #sidebar {
     width: 280px;
     background: #5865f2;
@@ -53,7 +51,7 @@
     text-align: center;
     letter-spacing: 1.5px;
   }
-  /* Altında ince ayırıcı çizgi */
+  
   #sidebar h2::after {
     content: "";
     display: block;
@@ -64,16 +62,17 @@
     border-radius: 2px;
   }
 
-  /* Sidebar Nav */
   #nav {
     list-style: none;
     padding: 0;
     margin: 0;
     flex-grow: 1;
   }
+  
   #nav li {
     margin-bottom: 16px;
   }
+  
   #nav button {
     width: 100%;
     background: transparent;
@@ -91,21 +90,23 @@
     position: relative;
     transition: background-color 0.3s ease, transform 0.15s ease;
   }
-  /* İkon stili */
+  
   #nav button .material-icons {
     font-size: 22px;
     transition: color 0.3s ease;
     flex-shrink: 0;
   }
+  
   #nav button:hover {
     background: rgba(255 255 255 / 0.25);
     transform: scale(1.03);
   }
+  
   #nav button.active {
     background: rgba(255 255 255 / 0.3);
     font-weight: 700;
   }
-  /* Aktif butonun altına animasyonlu çizgi */
+  
   #nav button.active::after {
     content: "";
     position: absolute;
@@ -123,7 +124,6 @@
     to { width: calc(100% - 40px); }
   }
 
-  /* Tema seçici */
   #theme-select-container {
     margin-top: auto;
     text-align: center;
@@ -155,7 +155,6 @@
     outline: none;
   }
 
-  /* Main content */
   #main {
     flex-grow: 1;
     background: #fff;
@@ -169,7 +168,6 @@
     background: #1f2328;
   }
 
-  /* Status bar */
   #status-bar {
     background: #5865f2;
     color: white;
@@ -187,8 +185,7 @@
     background: #43b581;
     box-shadow: 0 6px 20px rgb(67 181 129 / 0.7);
   }
-
-  /* Content sections */
+  
   .content-section {
     display: none;
     flex-direction: column;
@@ -199,7 +196,6 @@
     display: flex;
   }
 
-  /* Search inputs */
   .search-input {
     padding: 12px 18px;
     font-size: 1rem;
@@ -226,7 +222,6 @@
     border-color: #43b581;
   }
 
-  /* Commands list */
   #commands-list {
     flex-grow: 1;
     overflow-y: auto;
@@ -268,7 +263,6 @@
     color: #aab3cf;
   }
 
-  /* Events list */
   #events-list {
     font-family: 'Courier New', Courier, monospace;
     background: #f9fafb;
@@ -293,7 +287,6 @@
     border-bottom: 1px solid rgba(67, 181, 129, 0.25);
   }
 
-  /* Logs */
   #logs-container {
     display: flex;
     flex-direction: column;
@@ -360,7 +353,6 @@
     box-shadow: 0 0 35px rgb(67 181 129 / 0.45);
   }
 
-  /* Log satırları */
   .log-line {
     margin-bottom: 6px;
     padding: 3px 7px;
@@ -377,7 +369,6 @@
     color: #e74c3c;
   }
 
-  /* Responsive */
   @media (max-width: 900px) {
     body {
       flex-direction: column;
@@ -457,18 +448,15 @@
       Uptime: <span id="uptime">Yükleniyor...</span> | Ping: <span id="ping">Yükleniyor...</span>
     </div>
 
-    <!-- Komutlar -->
     <section id="commands-section" class="content-section active" role="tabpanel" aria-labelledby="tab-commands">
       <input type="search" id="filter-input" class="search-input" placeholder="Komutlarda ara..." aria-label="Komutlarda ara" autocomplete="off" />
       <div id="commands-list" aria-live="polite">Yükleniyor...</div>
     </section>
 
-    <!-- Eventler -->
     <section id="events-section" class="content-section" role="tabpanel" aria-labelledby="tab-events" tabindex="0">
       <div id="events-list">Yükleniyor...</div>
     </section>
 
-    <!-- Loglar -->
     <section id="logs-section" class="content-section" role="tabpanel" aria-labelledby="tab-logs" tabindex="0">
       <div id="logs-container">
         <input type="search" id="log-filter" class="search-input" placeholder="Loglarda ara..." aria-label="Loglarda ara" autocomplete="off" />
@@ -479,13 +467,13 @@
   </main>
 
 <script>
-  // Veri objesi ve containerlar
+  
   const commandDescriptions = {
     ping: 'Botun pingini gösterir',
     help: 'Komut yardım menüsünü açar',
     kick: 'Kullanıcı atma komutu',
     ban: 'Kullanıcı yasaklama komutu',
-    // diğer açıklamalar...
+    
   };
 
   const commandsList = document.getElementById('commands-list');
@@ -511,7 +499,6 @@
 
   let allCommands = [], allEvents = [], allLogs = [];
 
-  // Tab kontrol fonksiyonu
   function switchTab(tabKey) {
     for (const key in tabs) {
       const selected = (key === tabKey);
@@ -522,7 +509,6 @@
     }
   }
 
-  // Komutları render et
   function renderCommands(cmds) {
     commandsList.innerHTML = '';
     if (!cmds.length) {
@@ -538,7 +524,6 @@
     });
   }
 
-  // Eventleri render et
   function renderEvents(events) {
     if (!events.length) {
       eventsList.innerHTML = '<p>Aktif event yok</p>';
@@ -553,13 +538,11 @@
     });
   }
 
-  // Status güncelle
   function updateStatus() {
     uptimeEl.textContent = (performance.now() / 1000 / 60).toFixed(1) + ' dakika';
     pingEl.textContent = Math.floor(Math.random() * 50 + 50) + ' ms';
   }
 
-  // Log ekle
   function addLogLine(text, type='info') {
     const div = document.createElement('div');
     div.className = 'log-line';
@@ -573,7 +556,6 @@
     renderLogs();
   }
 
-  // Logları render et
   function renderLogs() {
     const filter = logFilterInput.value.toLowerCase();
     logOutput.innerHTML = '';
@@ -584,7 +566,6 @@
     });
   }
 
-  // Bot bilgisini çek
   async function fetchBotInfo() {
     try {
       const res = await fetch('/api/bot-info');
@@ -600,12 +581,10 @@
     }
   }
 
-  // Tab butonlarına event
   Object.entries(tabs).forEach(([key, btn]) => {
     btn.addEventListener('click', () => switchTab(key));
   });
 
-  // Arama filtreleri
   filterInput.addEventListener('input', () => {
     const filter = filterInput.value.toLowerCase();
     const filtered = allCommands.filter(c => c.toLowerCase().includes(filter));
@@ -613,26 +592,22 @@
   });
   logFilterInput.addEventListener('input', renderLogs);
 
-  // Log temizle
   logClearBtn.addEventListener('click', () => {
     allLogs = [];
     renderLogs();
   });
 
-  // Tema seçimi
   themeSelect.addEventListener('change', () => {
     document.body.setAttribute('data-theme', themeSelect.value);
     localStorage.setItem('dashboardTheme', themeSelect.value);
   });
 
-  // Kaydedilmiş tema varsa uygula
   const savedTheme = localStorage.getItem('dashboardTheme');
   if (savedTheme) {
     themeSelect.value = savedTheme;
     document.body.setAttribute('data-theme', savedTheme);
   }
 
-  // WebSocket log bağlantısı
   const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
   const ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/logs`);
 
@@ -649,7 +624,6 @@
   ws.onerror = () => addLogLine('⚠️ Log bağlantısı kopmuş veya açılamıyor.', 'warn');
   ws.onclose = () => addLogLine('❌ Log bağlantısı kapandı.', 'error');
 
-  // İlk yükleme ve periyodik yenileme
   fetchBotInfo();
   setInterval(fetchBotInfo, 30000);
 </script>

@@ -73,7 +73,6 @@ module.exports = (client) => {
       await logChannel.send({ embeds: [embed] });
       logger.log(`✅ ${member.user.tag} kullanıcısının davet logu başarıyla gönderildi.`);
 
-      // Ön belleği güncelle
       invites.set(member.guild.id, new Map(newInvites.map(i => [i.code, i.uses])));
     } catch (err) {
       logger.error('❌ guildMemberAdd davet log hatası:', err);

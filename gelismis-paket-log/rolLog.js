@@ -1,5 +1,5 @@
 const { EmbedBuilder, AuditLogEvent, PermissionsBitField } = require('discord.js');
-const logger = require('../utils/logger'); // Logger'ı ekledim
+const logger = require('../utils/logger');
 
 module.exports = (client) => {
   client.on('guildMemberUpdate', async (oldMember, newMember) => {

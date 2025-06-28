@@ -1,5 +1,5 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const logger = require('../utils/logger'); // Logger yolunu kendi yapına göre ayarla
+const logger = require('../utils/logger'); 
 
 module.exports = (client) => {
   client.on('guildMemberUpdate', async (oldMember, newMember) => {
