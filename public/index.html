@@ -480,6 +480,14 @@
         <option value="light">Açık</option>
       </select>
     </div>
+    <!-- var olan sidebar içeriğinin en sonuna ekle -->
+    <div id="user-panel" style="margin-top: 30px; color: white; text-align: center; user-select: none;">
+      <div id="user-info">
+        <a href="/auth/discord" style="color: white; text-decoration: underline;">Discord ile Giriş Yap</a>
+      </div>
+    </div>
+
+
   </aside>
 
   <main id="main">
@@ -516,7 +524,7 @@
     kick: 'Kullanıcı atma komutu',
     ban: 'Kullanıcı yasaklama komutu',
   };
-
+  const userInfoDiv = document.getElementById('user-info');
   const commandsList = document.getElementById('commands-list');
   const eventsList = document.getElementById('events-list');
   const filterInput = document.getElementById('filter-input');
@@ -635,6 +643,29 @@
       }
     });
   }
+
+
+    async function loadUser() {
+      try {
+        const res = await fetch('/api/user');
+        if (res.status === 401) {
+          // Giriş yok
+          userInfoDiv.innerHTML = `<a href="/auth/discord" style="color: white; text-decoration: underline;">Discord ile Giriş Yap</a>`;
+        } else {
+          const user = await res.json();
+          userInfoDiv.innerHTML = `
+            <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" style="width: 48px; height: 48px; border-radius: 50%; margin-bottom: 8px;" />
+            <div>${user.username}</div>
+            <a href="/logout" style="color: white; text-decoration: underline; display: block; margin-top: 10px;">Çıkış Yap</a>
+          `;
+        }
+      } catch (e) {
+        userInfoDiv.textContent = 'Kullanıcı bilgisi alınamadı.';
+      }
+    }
+
+    loadUser();
+
 
   async function fetchBotInfo() {
     try {
