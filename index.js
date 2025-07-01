@@ -73,6 +73,8 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(express.json()); // JSON gövde parse için
+
 // Passport serialize/deserialize
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
@@ -110,10 +112,66 @@ app.get('/logout', (req, res, next) => {
 });
 
 // Giriş yapılmış kullanıcı bilgisi endpoint'i
-app.get('/api/user', (req, res) => {
+app.get('/api/user', async (req, res) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Giriş yapılmamış!' });
-  res.json(req.user);
+
+  const user = req.user;
+  const guild = client.guilds.cache.get('1017854108662767659');
+  if (!guild) return res.status(500).json({ error: 'Sunucu bulunamadı' });
+
+  try {
+    const member = await guild.members.fetch({ user: user.id, force: true });
+
+    const roles = member.roles.cache.map(role => role.id);
+    
+    res.json({
+      id: user.id,
+      username: user.username,
+      avatar: user.avatar,
+      roles,
+    });
+    console.log('[🧪] Çekilen kullanıcı:', member.user.tag);
+    console.log('[🧪] Rol ID\'leri:', roles);
+
+    console.log('[✅] Kullanıcı Rolleri:', roles);
+
+  } catch (err) {
+    console.error('[❌] Kullanıcı rol bilgisi alınamadı:', err);
+    res.status(500).json({ error: 'Kullanıcı bilgisi alınamadı' });
+  }
 });
+
+app.get('/api/admin/users', async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Giriş yapılmamış!' });
+
+  const guild = client.guilds.cache.get('1017854108662767659');
+  if (!guild) return res.status(500).json({ error: 'Sunucu bulunamadı!' });
+
+  try {
+    const member = await guild.members.fetch(req.user.id);
+    const roles = member.roles.cache.map(role => role.id);
+    if (!roles.includes('1071958335122837554')) {
+      return res.status(403).json({ error: 'Yetkiniz yok!' });
+    }
+
+    await guild.members.fetch();
+    console.log('Cachedeki üye sayısı: ${guild.members.cache.size}');
+
+    const members = guild.members.cache;
+    const userList = members.map(member => ({
+      id: member.id,
+      username: member.user.username,
+      discriminator: member.user.discriminator,
+      avatar: member.user.avatar,
+    }));
+
+    res.json(userList);
+  } catch (err) {
+    console.error('Kullanıcılar alınamadı:', err);
+    res.status(500).json({ error: 'Sunucu üyeleri alınamadı.' });
+  }
+});
+
 
 // Ana sayfa
 app.get('/', (req, res) => {
@@ -136,8 +194,108 @@ app.get('/api/bot-info', (req, res) => {
   console.log(">> API İSTEĞİ /api/bot-info");
   console.log(">> Yüklü Eventler:", events);
   console.log(">> Sunucular:", servers);
+  
+  const uptimeMs = client.uptime || 0;
+  const uptimeMinutes = Math.floor(uptimeMs / 60000);
+  const ping = Math.floor(client.ws.ping);
+  
+  res.json({ commands, events, servers, uptime: uptimeMinutes, ping });
+});
 
-  res.json({ commands, events, servers });
+
+
+// Kick işlemi
+app.post('/api/user/kick', async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Giriş yapılmamış!' });
+
+  const { targetUserId, reason } = req.body;
+  if (!targetUserId) return res.status(400).json({ error: 'Hedef kullanıcı belirtilmedi!' });
+
+  const guild = client.guilds.cache.get('1017854108662767659');
+  if (!guild) return res.status(500).json({ error: 'Sunucu bulunamadı!' });
+
+  try {
+    const member = await guild.members.fetch(req.user.id);
+    const roles = member.roles.cache.map(r => r.id);
+    if (!roles.includes('1071958335122837554')) return res.status(403).json({ error: 'Yetkiniz yok!' });
+
+    const targetMember = await guild.members.fetch(targetUserId);
+    await targetMember.kick(reason || 'Sebep belirtilmedi');
+    res.json({ message: 'Kullanıcı sunucudan atıldı.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'İşlem başarısız.' });
+  }
+});
+
+// Ban işlemi
+app.post('/api/user/ban', async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Giriş yapılmamış!' });
+
+  const { targetUserId, reason } = req.body;
+  if (!targetUserId) return res.status(400).json({ error: 'Hedef kullanıcı belirtilmedi!' });
+
+  const guild = client.guilds.cache.get('1017854108662767659');
+  if (!guild) return res.status(500).json({ error: 'Sunucu bulunamadı!' });
+
+  try {
+    const member = await guild.members.fetch(req.user.id);
+    const roles = member.roles.cache.map(r => r.id);
+    if (!roles.includes('1071958335122837554')) return res.status(403).json({ error: 'Yetkiniz yok!' });
+
+    await guild.bans.create(targetUserId, { reason: reason || 'Sebep belirtilmedi' });
+    res.json({ message: 'Kullanıcı banlandı.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'İşlem başarısız.' });
+  }
+});
+
+// Timeout (mute) işlemi - Discord.js v14'te timeout için:
+app.post('/api/user/timeout', async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Giriş yapılmamış!' });
+
+  const { targetUserId, durationSeconds, reason } = req.body;
+  if (!targetUserId || !durationSeconds) return res.status(400).json({ error: 'Eksik parametre!' });
+
+  const guild = client.guilds.cache.get('1017854108662767659');
+  if (!guild) return res.status(500).json({ error: 'Sunucu bulunamadı!' });
+
+  try {
+    const member = await guild.members.fetch(req.user.id);
+    const roles = member.roles.cache.map(r => r.id);
+    if (!roles.includes('1071958335122837554')) return res.status(403).json({ error: 'Yetkiniz yok!' });
+
+    const targetMember = await guild.members.fetch(targetUserId);
+    await targetMember.timeout(durationSeconds * 1000, reason || 'Sebep belirtilmedi');
+    res.json({ message: `Kullanıcı ${durationSeconds} saniye süreyle susturuldu.` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'İşlem başarısız.' });
+  }
+});
+
+app.get('/api/user/guilds', async (req, res) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Giriş yapılmamış!' });
+
+  const userGuilds = req.user.guilds; // DiscordStrategy ile gelen sunucu listesi
+  const botGuilds = client.guilds.cache;
+
+  // Ortak olanları filtrele
+  const mutualGuilds = userGuilds.filter(guild => botGuilds.has(guild.id));
+
+  const result = mutualGuilds.map(guild => {
+    const botGuild = botGuilds.get(guild.id);
+    return {
+      id: guild.id,
+      name: guild.name,
+      iconURL: botGuild.iconURL({ dynamic: true }) || null,
+      memberCount: botGuild.memberCount,
+      permissions: guild.permissions,
+    };
+  });
+
+  res.json(result);
 });
 
 const server = http.createServer(app);

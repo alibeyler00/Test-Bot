@@ -26,6 +26,7 @@
     background: #121417;
     color: #e4e6eb;
   }
+  
 
   #sidebar {
     width: 280px;
@@ -124,36 +125,10 @@
     to { width: calc(100% - 40px); }
   }
 
-  #theme-select-container {
-    margin-top: auto;
-    text-align: center;
-    user-select: none;
-  }
-  label[for="theme-select"] {
-    font-weight: 700;
-    display: block;
-    margin-bottom: 10px;
-    color: white;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-  }
-  #theme-select {
-    padding: 12px 18px;
-    font-size: 1rem;
-    border-radius: 18px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    background: rgba(255 255 255 / 0.25);
-    color: white;
-    transition: background-color 0.3s ease;
-  }
-  #theme-select:hover,
-  #theme-select:focus {
-    background: rgba(255 255 255 / 0.4);
-    outline: none;
-  }
+  
+  
+  
+  
 
   #main {
     flex-grow: 1;
@@ -368,53 +343,94 @@
   .log-error {
     color: #e74c3c;
   }
-
+  .mobile-only { display: none; }
   @media (max-width: 900px) {
+    #nav, #sidebar h2 { display: none; }
     body {
-      flex-direction: column;
+      flex-direction: column-reverse;
     }
     #sidebar {
       width: 100%;
       flex-direction: row;
-      padding: 15px 20px;
+      padding: 30px 40px;
       overflow-x: auto;
       box-shadow: none;
-    }
-    #sidebar h2 {
-      margin: 0 20px 0 0;
-      font-size: 1.5rem;
-      flex-shrink: 0;
-    }
-    #nav {
-      display: flex;
-      flex-direction: row;
-      gap: 10px;
-      flex-grow: 1;
-      overflow-x: auto;
-    }
-    #nav li {
-      margin: 0;
-    }
-    #nav button {
-      padding: 10px 16px;
-      font-size: 1rem;
       border-radius: 10px;
-      justify-content: center;
     }
-    #nav button .material-icons {
-      display: none;
+    #mobile-menu-btn {
+      display: block;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      cursor: pointer;
+      z-index: 1001;
     }
-    #theme-select-container {
-      margin-left: 20px;
-      margin-top: 0;
-      flex-shrink: 0;
+    #mobile-menu-overlay {
+      display: none; /* toggle ile JS kontrolü */
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
     }
+    #mobile-menu-list {
+      background: #fff;
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      max-height: 60%;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease forwards;
+    }
+    #mobile-menu-list .close-mobile-menu {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      float: right;
+      cursor: pointer;
+    }
+    #mobile-menu-list ul {
+      list-style: none;
+      margin: 30px 0 0 0;
+      padding: 0;
+    }
+    #mobile-menu-list li + li {
+      margin-top: 12px;
+    }
+    #mobile-menu-list button {
+      width: 100%;
+      text-align: left;
+      padding: 12px;
+      border: none;
+      background: #f5f5f5;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    #mobile-menu-list button:hover {
+      background: #e0e0e0;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    
     #main {
       height: auto;
       padding: 20px 20px 40px;
     }
     .content-section {
       height: auto;
+    }
+    #user-panel {
+      
     }
   }
   #servers-list {
@@ -430,10 +446,12 @@
     background: #f1f3f5;
     border-radius: 14px;
     box-shadow: 0 4px 8px rgb(0 0 0 / 0.08);
-    padding: 12px 18px;
+    padding: 16px;
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
     cursor: default;
     width: 280px;
     transition: background-color 0.3s ease;
@@ -446,7 +464,252 @@
   body[data-theme="dark"] .server-item:hover {
     background: #3a4050;
   }
+  .overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10000;
+  }
+  .action-panel {
+    background: #2f3136;
+    padding: 90px 80px; /* Eskisi: 25px 30px */
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 620px;       /* Eskisi: 320px */
+    max-width: 90vw;        /* Ekran dar olursa responsive olur */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .action-panel h3 {
+    margin: 0 0 10px 0;
+    font-size: 2.0rem;
+    font-weight: 800;
+    text-align: center;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+  }
+  .action-panel button {
+    padding: 12px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #5865f2;
+    color: white;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+  }
+  .user-action-btn {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #5865f2, #4751d4);
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.35);
+  }
+  .action-panel button:hover {
+    background-color: #4752c4;
+    transform: scale(1.03);
+  }
+  .action-panel button:hover {
+    background-color: #4752c4;
+    transform: scale(1.03);
+  }
+  .user-action-btn:hover {
+    background: linear-gradient(135deg, #6e77f2, #5865f2);
+    transform: scale(1.05);
+    box-shadow: 0 6px 18px rgba(88, 101, 242, 0.5);
+  }
+  #users-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 10px;
+  }
+  #users-list .server-item {
+    flex: 1 1 280px;
+    max-width: 320px;
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    background: #f1f3f5;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.3s ease;
+    gap: 12px;
+  }
+  body[data-theme="dark"] #users-list .server-item {
+    background: #2c313a;
+    box-shadow: 0 4px 10px rgb(67 181 129 / 0.15);
+    color: #d0d4dd;
+  }
+  body[data-theme="dark"] #users-list .server-item:hover {
+    background: #3a4050;
+  }
+  .user-info-text {
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .action-form {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+  }
 
+  .action-form input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  .user-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  #notify-popup {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2f3136;
+    color: white;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s ease;
+    z-index: 9999;
+  }
+
+  #notify-popup.show {
+    opacity: 1;
+    pointer-events: auto;
+    animation: popup-appear 0.4s ease, popup-disappear 0.4s ease 2.4s;
+  }
+
+  @keyframes popup-appear {
+    from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+
+  @keyframes popup-disappear {
+    to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  }
+
+  #notify-popup.success #notify-icon {
+    content: '✅';
+    animation: bounce 1s infinite;
+  }
+
+  #notify-popup.error #notify-icon {
+    content: '❌';
+    animation: shake 1s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+  }
+  #home-section {
+    padding: 40px;
+    text-align: center;
+    animation: slideUp 0.6s ease;
+  }
+
+  .home-header h1 {
+    font-size: 2.4em;
+    margin-bottom: 10px;
+  }
+
+  .home-header p {
+    font-size: 1.2em;
+    color: #ccc;
+  }
+
+  .card-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 40px;
+    gap: 20px;
+  }
+
+  .card {
+    background: linear-gradient(145deg, #2f3136, #202225);
+    border: 1px solid #444;
+    border-radius: 16px;
+    padding: 24px;
+    width: 250px;
+    min-height: 180px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.3);
+    transition: transform 0.3s ease;
+    color: white;
+    opacity: 0;
+  }
+
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 4px 20px rgba(88, 101, 242, 0.5);
+  }
+
+  .fade-in {
+    animation: fadeInUp 1s forwards;
+  }
+
+  .delay-1 { animation-delay: 0.3s; }
+  .delay-2 { animation-delay: 0.6s; }
+  .delay-3 { animation-delay: 0.9s; }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(60px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    .card-container {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .card {
+      width: 90%;
+    }
+  }
 </style>
 </head>
 <body data-theme="dark">
@@ -455,7 +718,11 @@
     <h2>Logs Dashboard</h2>
     <ul id="nav" role="tablist" aria-label="Menü">
       <li>
-        <button role="tab" aria-selected="true" id="tab-commands" aria-controls="commands-section" class="active">
+        <button role="tab" aria-selected="true" id="tab-home" aria-controls="home-section" class="active">
+        <span class="material-icons" aria-hidden="true">home</span> Ana sayfa
+      </button></li>
+      <li>
+        <button role="tab" aria-selected="false" id="tab-commands" aria-controls="commands-section">
         <span class="material-icons" aria-hidden="true">settings</span> Komutlar
       </button></li>
       <li>
@@ -471,21 +738,26 @@
         <span class="material-icons" aria-hidden="true">groups</span> Sunucular
         </button>
       </li>
+      <li>
+        <button role="tab" aria-selected="false" id="tab-admin" aria-controls="admin-section">
+          <span class="material-icons" aria-hidden="true">admin_panel_settings</span> Yönetim
+        </button>
+      </li>
+      
 
     </ul>
-    <div id="theme-select-container">
-      <label for="theme-select">Tema</label>
-      <select id="theme-select" aria-label="Tema Seçimi">
-        <option value="dark" selected>Karanlık</option>
-        <option value="light">Açık</option>
-      </select>
-    </div>
+    <button id="mobile-menu-btn" class="mobile-only" aria-label="Menüyü aç/kapat">≡</button>
+
+    
     <!-- var olan sidebar içeriğinin en sonuna ekle -->
+    
     <div id="user-panel" style="margin-top: 30px; color: white; text-align: center; user-select: none;">
       <div id="user-info">
         <a href="/auth/discord" style="color: white; text-decoration: underline;">Discord ile Giriş Yap</a>
       </div>
     </div>
+    
+    
 
 
   </aside>
@@ -494,8 +766,41 @@
     <div id="status-bar" role="status" aria-live="polite">
       Uptime: <span id="uptime">Yükleniyor...</span> | Ping: <span id="ping">Yükleniyor...</span>
     </div>
+    <!--
+    <div id="user-panel" style="margin-top: 30px; color: white; text-align: center; user-select: none;">
+      <div id="user-info">
+        <a href="/auth/discord" style="color: white; text-decoration: underline;">Discord ile Giriş Yap</a>
+      </div>
+    </div>
+    -->
+    
+    <section id="home-section" class="content-section active" role="tabpanel" aria-labelledby="tab-home">
+      <div class="home-header">
+        <h1>🚀 Logs Dashboard’a Hoş Geldin!</h1>
+        <p>Sunucunu yönet, komutları düzenle, canlı logları takip et.</p>
+      </div>
 
-    <section id="commands-section" class="content-section active" role="tabpanel" aria-labelledby="tab-commands">
+      <div class="card-container">
+        <div class="card fade-in">
+          <h2>⚙️ Komutlar</h2>
+          <p>Botunun tüm komutlarını buradan yönetebilirsin.</p>
+        </div>
+        <div class="card fade-in delay-1">
+          <h2>📊 Loglar</h2>
+          <p>Sunucudaki tüm hareketleri detaylı şekilde izle.</p>
+        </div>
+        <div class="card fade-in delay-2">
+          <h2>🛠️ Yönetim</h2>
+          <p>Üyeleri yönet, roller ver/al, banla veya zaman aşımına sok.</p>
+        </div>
+        <div class="card fade-in delay-3">
+          <h2>🌐 Sunucular</h2>
+          <p>Botun bulunduğu sunucuları görüntüle ve detaylarını öğren.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="commands-section" class="content-section" role="tabpanel" aria-labelledby="tab-commands" tabindex="0">
       <input type="search" id="filter-input" class="search-input" placeholder="Komutlarda ara..." aria-label="Komutlarda ara" autocomplete="off" />
       <div id="commands-list" aria-live="polite">Yükleniyor...</div>
     </section>
@@ -514,9 +819,84 @@
     <section id="servers-section" class="content-section" role="tabpanel" aria-labelledby="tab-servers" tabindex="0">
       <input type="search" id="server-filter" class="search-input" placeholder="Sunucularda ara..." aria-label="Sunucularda ara" autocomplete="off" />
       <div id="servers-list" aria-live="polite">Yükleniyor...</div>
+      </section>
+      <section id="admin-section" class="content-section" role="tabpanel" aria-labelledby="tab-admin" tabindex="0">
+        <h2>Yönetim Paneli</h2>
+        <p>Bu alan yalnızca "Yetkili Kadrosu" rolüne sahip kullanıcılar tarafından görüntülenebilir.</p>
+        <input type="search" id="user-filter" class="search-input" placeholder="Kullanıcı ara..." aria-label="Kullanıcı ara" />
+        <div id="users-list" style="overflow-y: auto; flex-grow: 1;"></div>
+      </section>
     </section>
 
   </main>
+  <div id="user-action-overlay" class="overlay" style="display:none;">
+    <div class="action-panel">
+      <h3>🎛 Kullanıcı İşlemleri</h3>
+      <button data-action="timeout">⏱️ Zamanaşımı Ver</button>
+      <button data-action="kick">🦵 Sunucudan At</button>
+      <button data-action="ban">🚫 Banla</button>
+      <button id="close-action-overlay">❌ Kapat</button>
+    </div>
+    
+
+  </div>
+  
+  <!-- Kick Modal -->
+  <div id="kick-overlay" class="overlay" style="display:none;">
+    <div class="action-panel">
+      <h3>🦵 Kullanıcıyı At</h3>
+      <input type="text" id="kick-reason-input" placeholder="Sebep gir" />
+      <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+        <button onclick="submitKick()">✅ At</button>
+        <button onclick="closeAllModals()">❌ İptal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ban Modal -->
+  <div id="ban-overlay" class="overlay" style="display:none;">
+    <div class="action-panel">
+      <h3>🚫 Kullanıcıyı Banla</h3>
+      <input type="text" id="ban-reason-input" placeholder="Sebep gir" />
+      <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+        <button onclick="submitBan()">✅ Banla</button>
+        <button onclick="closeAllModals()">❌ İptal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeout Modal -->
+  <div id="timeout-overlay" class="overlay" style="display:none;">
+    <div class="action-panel">
+      <h3>⏱️ Kullanıcıyı Sustur</h3>
+      <input type="number" id="timeout-duration-input" placeholder="Süre (Sn)" min="1" />
+      <input type="text"   id="timeout-reason-input"   placeholder="Sebep gir" />
+      <div style="margin-top:20px; display:flex; gap:10px; justify-content:center;">
+        <button onclick="submitTimeout()">✅ Sustur</button>
+        <button onclick="closeAllModals()">❌ İptal</button>
+      </div>
+    </div>
+  </div>
+  <div id="notify-popup" class="hidden">
+    <span id="notify-icon">✅</span>
+    <span id="notify-text">İşlem başarılı</span>
+  </div>
+
+  <!-- BODY sonuna: Tam ekran mobil menü overlay -->
+  <div id="mobile-menu-overlay" class="overlay mobile-only" style="display:none; align-items:flex-start; justify-content:flex-end;">
+    <div id="mobile-menu-list">
+      <button class="close-mobile-menu" aria-label="Kapat">✕</button>
+      <ul>
+        <li><button onclick="switchTab('home'); toggleMobileMenu()">Ana sayfa</button></li>
+        <li><button onclick="switchTab('commands'); toggleMobileMenu()">Komutlar</button></li>
+        <li><button onclick="switchTab('events'); toggleMobileMenu()">Eventler</button></li>
+        <li><button onclick="switchTab('logs'); toggleMobileMenu()">Loglar</button></li>
+        <li><button onclick="switchTab('servers'); toggleMobileMenu()">Sunucular</button></li>
+        <li><button onclick="switchTab('admin'); toggleMobileMenu()">Yönetim</button></li>
+      </ul>
+    </div>
+  </div>
+  
   <script>
   const commandDescriptions = {
     ping: 'Botun pingini gösterir',
@@ -533,26 +913,41 @@
   const logClearBtn = document.getElementById('log-clear-btn');
   const uptimeEl = document.getElementById('uptime');
   const pingEl = document.getElementById('ping');
-  const themeSelect = document.getElementById('theme-select');
+
 
   // *** YENİ EKLENEN ELEMENTLER ***
   const serverFilterInput = document.getElementById('server-filter');
   const serversList = document.getElementById('servers-list');
+  const userFilterInput = document.getElementById('user-filter');
+  const usersList = document.getElementById('users-list');
+  const mobileBtn = document.getElementById('mobile-menu-btn');
+  const mobileOverlay = document.getElementById('mobile-menu-overlay');
+  const closeMobileBtn = document.querySelector('#mobile-menu-list .close-mobile-menu');
+  
+
 
   const tabs = {
+    home: document.getElementById('tab-home'),
     commands: document.getElementById('tab-commands'),
     events: document.getElementById('tab-events'),
     logs: document.getElementById('tab-logs'),
     servers: document.getElementById('tab-servers'),  // yeni sekme
+    admin: document.getElementById('tab-admin')
+
   };
   const sections = {
+    home: document.getElementById('home-section'),
     commands: document.getElementById('commands-section'),
     events: document.getElementById('events-section'),
     logs: document.getElementById('logs-section'),
     servers: document.getElementById('servers-section'), // yeni içerik alanı
+    admin: document.getElementById('admin-section')
+
   };
 
-  let allCommands = [], allEvents = [], allLogs = [], allServers = []; // sunucular eklendi
+  let allCommands = [], allEvents = [], allLogs = [], allServers = [];
+  let allUsers = [];
+  let currentUserId = null;
 
   function switchTab(tabKey) {
     for (const key in tabs) {
@@ -615,10 +1010,10 @@
 
       });
     }
-
-  function updateStatus() {
-    uptimeEl.textContent = (performance.now() / 1000 / 60).toFixed(1) + ' dakika';
-    pingEl.textContent = Math.floor(Math.random() * 50 + 50) + ' ms';
+    
+  function updateStatus(data) {
+    uptimeEl.textContent = data?.uptime + ' dakika';
+    pingEl.textContent = data?.ping + ' ms';
   }
 
   function addLogLine(text, type='info') {
@@ -643,30 +1038,88 @@
       }
     });
   }
-
-
     async function loadUser() {
       try {
         const res = await fetch('/api/user');
         if (res.status === 401) {
-          // Giriş yok
           userInfoDiv.innerHTML = `<a href="/auth/discord" style="color: white; text-decoration: underline;">Discord ile Giriş Yap</a>`;
-        } else {
-          const user = await res.json();
-          userInfoDiv.innerHTML = `
-            <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" style="width: 48px; height: 48px; border-radius: 50%; margin-bottom: 8px;" />
-            <div>${user.username}</div>
-            <a href="/logout" style="color: white; text-decoration: underline; display: block; margin-top: 10px;">Çıkış Yap</a>
-          `;
+          tabs.events.style.display = 'none';
+          tabs.logs.style.display = 'none';
+          tabs.admin.style.display = 'none';
+          return;
         }
+
+        const user = await res.json();
+        const roleIDs = Array.isArray(user.roles) ? user.roles : [];
+        console.log('Gelen roller:', roleIDs);
+        currentUserId = user.id;
+
+        // Yetkilere göre görünürlük
+        const isOwner = roleIDs.includes('1017854108662767666');
+        const isLogModerator = roleIDs.includes('1234738711250468881');
+        const isCodeSharer = roleIDs.includes('1234739952676372532');
+        const isAdminStaff = roleIDs.includes('1071958335122837554');
+        // Sadece tek engel kriteri: Eğer sadece sunucu üyesi rolü varsa (yani en yüksek rol buysa)
+        const isRegularMember = roleIDs.includes('1099007013444407457');
+
+        const isRestrictedUser = isRegularMember && !isAdminStaff;
+
+        // Sekmelerin kontrolü
+        
+        if (isRestrictedUser) {
+          // Yalnızca sunucu üyesi olanlara hiçbir yetkili sekme gösterilmez
+          tabs.events.style.display = 'none';
+          tabs.logs.style.display = 'none';
+          tabs.commands.style.display = 'none';
+          tabs.admin.style.display = 'none';
+        } else {
+          // Kurucu değilse diğer kısıtlamalar
+          if (!isOwner) {
+            if (!isLogModerator) tabs.logs.style.display = 'none';
+            if (!isCodeSharer) tabs.commands.style.display = 'none';
+            if (!isLogModerator && !isOwner && !isCodeSharer && !isAdminStaff) tabs.servers.style.display = 'none';
+            if (!isAdminStaff) tabs.admin.style.display = 'none';
+
+            tabs.events.style.display = 'none'; // sadece kurucuya özel
+          }
+        }
+
+        if (isAdminStaff) fetchAllUsers();
+        
+        console.log('Kurucu mu?', isOwner);
+        console.log('Log Moderatörü mü?', isLogModerator);
+        console.log('Kod Paylaşımcı mı?', isCodeSharer);
+
+        // Kullanıcı bilgileri
+        userInfoDiv.innerHTML = `
+          <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" style="width: 48px; height: 48px; border-radius: 50%; margin-bottom: 8px;" />
+          <div>${user.username}</div>
+          <a href="/logout" style="color: white; text-decoration: underline; display: block; margin-top: 10px;">Çıkış Yap</a>
+        `;
+
       } catch (e) {
+        console.error(e);
         userInfoDiv.textContent = 'Kullanıcı bilgisi alınamadı.';
       }
     }
 
     loadUser();
+    
+    async function fetchAllUsers() {
+      try {
+        const res = await fetch('/api/admin/users');
+        if (!res.ok) throw new Error('Kullanıcılar alınamadı');
+        allUsers = await res.json();
+        console.log('Tüm kullanıcılar:', allUsers);
+        renderUsers(allUsers);
+      } catch (err) {
+        usersList.textContent = 'Kullanıcı listesi alınamadı.';
+        console.error(err);
+      }
+    }
+    
 
-
+    
   async function fetchBotInfo() {
     try {
       const res = await fetch('/api/bot-info');
@@ -680,13 +1133,135 @@
       renderCommands(allCommands);
       renderEvents(allEvents);
       renderServers(allServers);        // sunucuları göster
-      updateStatus();
+      updateStatus(data);
     } catch(e) {
       commandsList.textContent = 'Veri alınamadı.';
       eventsList.innerHTML = 'Veri alınamadı.';
       serversList.textContent = 'Veri alınamadı.';
     }
   }
+    function showActionForm(action) {
+      document.querySelectorAll('.action-form').forEach(f => f.style.display = 'none');
+      const targetForm = document.getElementById(`${action}-form`);
+      if (targetForm) targetForm.style.display = 'flex';
+    }
+    // —————— 1) API çağrılarını yapan yardımcı fonksiyonlar ——————
+    async function kickUser(userId, reason) {
+      const res = await fetch('/api/user/kick', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ targetUserId: userId, reason })
+      });
+      const data = await res.json();
+      return data;
+    }
+
+    async function banUser(userId, reason) {
+      const res = await fetch('/api/user/ban', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ targetUserId: userId, reason })
+      });
+      const data = await res.json();
+      return data;
+    }
+
+    async function timeoutUser(userId, durationSec, reason) {
+      const res = await fetch('/api/user/timeout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ targetUserId: userId, durationSeconds: durationSec, reason })
+      });
+      const data = await res.json();
+      return data;
+    }
+    function openModal(type, userId) {
+      // önce hepsini kapat
+      closeAllModals();
+      // userId’yi data attribute’tan tutalım:
+      document.querySelectorAll('.overlay').forEach(o => o.dataset.userId = userId);
+      // sonra istediğimizi aç:
+      document.getElementById(`${type}-overlay`).style.display = 'flex';
+    }
+
+    function closeAllModals() {
+      document.querySelectorAll('.overlay').forEach(o => {
+        o.style.display = 'none';
+        // ve içindeki input’ları temizle:
+        o.querySelectorAll('input').forEach(i => i.value = '');
+      });
+    }
+    // —————— 2) form gönderme işlevlerini güncelle —————— 
+    async function submitKick() {
+      const overlay = document.getElementById('kick-overlay');
+      const userId = overlay.dataset.userId;
+      const reason = document.getElementById('kick-reason-input').value.trim() || undefined;
+      try {
+        const res = await kickUser(userId, reason);
+        showNotification('İşlem başarılı!', 'success');
+      } catch (err) {
+        showNotification('Bir hata oluştu: ' + err.message, 'error');
+      }
+      closeAllModals();
+    }
+
+    async function submitBan() {
+      const overlay = document.getElementById('ban-overlay');
+      const userId = overlay.dataset.userId;
+      const reason = document.getElementById('ban-reason-input').value.trim() || undefined;
+      try {
+        const res = await banUser(userId, reason);
+        showNotification('İşlem başarılı!', 'success');
+      } catch (err) {
+        showNotification('Bir hata oluştu: ' + err.message, 'error');
+      }
+      closeAllModals();
+    }
+
+    async function submitTimeout() {
+      const overlay = document.getElementById('timeout-overlay');
+      const userId = overlay.dataset.userId;
+      const duration = parseInt(document.getElementById('timeout-duration-input').value, 10);
+      const reason   = document.getElementById('timeout-reason-input').value.trim() || undefined;
+      if (isNaN(duration) || duration < 1) {
+        return showNotification('Lütfen geçerli bir süre girin!', 'error');
+      }
+      try {
+        const res = await timeoutUser(userId, duration, reason);
+        showNotification('İşlem başarılı!', 'success');
+      } catch (err) {
+        showNotification('Bir hata oluştu: ' + err.message, 'error');
+      }
+      closeAllModals();
+    }
+
+    function showNotification(text, type = 'success') {
+      const popup = document.getElementById('notify-popup');
+      const icon = document.getElementById('notify-icon');
+      const msg = document.getElementById('notify-text');
+
+      popup.className = '';
+      popup.classList.add('show', type === 'error' ? 'error' : 'success');
+      icon.textContent = type === 'error' ? '❌' : '✅';
+      msg.textContent = text;
+
+      // Otomatik kapansın
+      setTimeout(() => {
+        popup.classList.remove('show');
+      }, 3000);
+    }
+
+    function toggleMobileMenu() {
+      if (mobileOverlay.style.display === 'flex') {
+        mobileOverlay.style.display = 'none';
+      } else {
+        mobileOverlay.style.display = 'flex';
+      }
+    }
+  
 
   Object.entries(tabs).forEach(([key, btn]) => {
     btn.addEventListener('click', () => switchTab(key));
@@ -711,16 +1286,22 @@
     renderLogs();
   });
 
-  themeSelect.addEventListener('change', () => {
-    document.body.setAttribute('data-theme', themeSelect.value);
-    localStorage.setItem('dashboardTheme', themeSelect.value);
+  
+  userFilterInput.addEventListener('input', () => {
+    const filter = userFilterInput.value.toLowerCase();
+    const filtered = allUsers.filter(u => 
+      `${u.username}#${u.discriminator}`.toLowerCase().includes(filter)
+    );
+      renderUsers(filtered);
   });
 
-  const savedTheme = localStorage.getItem('dashboardTheme');
-  if (savedTheme) {
-    themeSelect.value = savedTheme;
-    document.body.setAttribute('data-theme', savedTheme);
-  }
+    mobileBtn.addEventListener('click', toggleMobileMenu);
+    // Kapama butonu
+    closeMobileBtn.addEventListener('click', toggleMobileMenu);
+    // Overlay’in boş kısmına tıklayınca da kapansın
+    mobileOverlay.addEventListener('click', e => {
+      if (e.target === mobileOverlay) toggleMobileMenu();
+    });
 
   const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
   const ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/logs`);
@@ -740,6 +1321,65 @@
 
   fetchBotInfo();
   setInterval(fetchBotInfo, 30000);
+    // Overlay & Interaction kontrolleri
+    const overlay = document.getElementById('user-action-overlay');
+    const closeOverlayBtn = document.getElementById('close-action-overlay');
+
+    function openUserActionOverlay(userId) {
+      overlay.dataset.userId = userId;
+      overlay.style.display = 'flex';
+    }
+
+    closeOverlayBtn.addEventListener('click', () => overlay.style.display = 'none');
+
+    overlay.querySelectorAll('.action-panel > button[data-action]').forEach(btn =>
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        const userId = overlay.dataset.userId;
+        // ana overlay’i kapat
+        overlay.style.display = 'none';
+        // ilgili modal’ı aç
+        openModal(action, userId);
+      })
+    );
+
+
+    // renderUsers() fonksiyonunu aşağıdaki gibi güncelle:
+    function renderUsers(users) {
+      console.log('Render edilecek kullanıcılar:', users);
+      usersList.innerHTML = '';
+      if (!users.length) {
+        usersList.textContent = 'Kullanıcı bulunamadı.';
+        return;
+      }
+      users.forEach(user => {
+        const avatarURL = user.avatar
+          ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`
+          : 'https://cdn.discordapp.com/embed/avatars/0.png';
+
+        const isSelf = user.id === currentUserId;
+        
+        const div = document.createElement('div');
+        div.className = 'server-item';
+        div.innerHTML = `
+          <img src="${avatarURL}" width="40" height="40" style="border-radius:50%; margin-right:12px;" />
+          <strong>${user.username}</strong>
+          <button class="user-action-btn" data-user-id="${user.id}" style="margin-top: 10px; padding: 6px 12px; border: none; background: #5865f2; color: white; border-radius: 10px; width: 100%;" ${isSelf ? 'disabled title="Kendine işlem yapamazsın"' : ''}>
+            İşlem
+          </button>
+        `;
+        usersList.appendChild(div);
+      });
+      document.querySelectorAll('.user-action-btn').forEach(btn => {
+        if (!btn.disabled) {
+          btn.addEventListener('click', () => openUserActionOverlay(btn.dataset.userId));
+        }
+      });
+    }
+
   </script>
+  <!-- Kullanıcı İşlem Menüsü Overlay -->
+  
+
 </body>
 </html>
