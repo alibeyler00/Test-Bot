@@ -352,7 +352,7 @@
     #sidebar {
       width: 100%;
       flex-direction: row;
-      padding: 30px 40px;
+      padding: 35px 40px;
       overflow-x: auto;
       box-shadow: none;
       border-radius: 10px;
@@ -360,7 +360,7 @@
     #mobile-menu-btn {
       display: block;
       position: absolute;
-      top: 20px;
+      top: 30px;
       right: 20px;
       background: transparent;
       border: none;
@@ -429,9 +429,11 @@
     .content-section {
       height: auto;
     }
-    #user-panel {
-      
+    #exit-text {
+      transform: translate(70px, -70px);
+      margin-top: 10px;
     }
+    
   }
   #servers-list {
     display: flex;
@@ -751,7 +753,7 @@
     
     <!-- var olan sidebar içeriğinin en sonuna ekle -->
     
-    <div id="user-panel" style="margin-top: 30px; color: white; text-align: center; user-select: none;">
+    <div id="user-panel" style="margin-top: 5px; color: white; text-align: center; user-select: none;">
       <div id="user-info">
         <a href="/auth/discord" style="color: white; text-decoration: underline;">Discord ile Giriş Yap</a>
       </div>
@@ -887,13 +889,15 @@
     <div id="mobile-menu-list">
       <button class="close-mobile-menu" aria-label="Kapat">✕</button>
       <ul>
-        <li><button onclick="switchTab('home'); toggleMobileMenu()">Ana sayfa</button></li>
-        <li><button onclick="switchTab('commands'); toggleMobileMenu()">Komutlar</button></li>
-        <li><button onclick="switchTab('events'); toggleMobileMenu()">Eventler</button></li>
-        <li><button onclick="switchTab('logs'); toggleMobileMenu()">Loglar</button></li>
-        <li><button onclick="switchTab('servers'); toggleMobileMenu()">Sunucular</button></li>
-        <li><button onclick="switchTab('admin'); toggleMobileMenu()">Yönetim</button></li>
+        <li data-auth="any"><button onclick="switchTab('home'); toggleMobileMenu()">Ana sayfa</button></li>
+        <li data-auth="logged" data-role="1234739952676372532"><button onclick="switchTab('commands'); toggleMobileMenu()">Komutlar</button></li>
+        <li data-auth="logged" data-role="1017854108662767666"><button onclick="switchTab('events'); toggleMobileMenu()">Eventler</button></li>
+        <li data-auth="logged" data-role="1234738711250468881"><button onclick="switchTab('logs'); toggleMobileMenu()">Loglar</button></li>
+        <li data-auth="logged"><button onclick="switchTab('servers'); toggleMobileMenu()">Sunucular</button></li>
+        <li data-auth="logged" data-role="1071958335122837554"><button onclick="switchTab('admin'); toggleMobileMenu()">Yönetim</button></li>
+        <li data-auth="guest"><button onclick="window.location='/auth/discord'">Giriş Yap</button></li>
       </ul>
+
     </div>
   </div>
   
@@ -1038,6 +1042,11 @@
       }
     });
   }
+    document.querySelectorAll('#mobile-menu-list li').forEach(li => {
+      const auth = li.dataset.auth || 'any';
+      li.style.display = (auth === 'any' || auth === 'guest') ? '' : 'none';
+    });
+
     async function loadUser() {
       try {
         const res = await fetch('/api/user');
@@ -1053,6 +1062,32 @@
         const roleIDs = Array.isArray(user.roles) ? user.roles : [];
         console.log('Gelen roller:', roleIDs);
         currentUserId = user.id;
+
+        // Mobil menü görünürlüğü ayarı
+        document.querySelectorAll('#mobile-menu-list li').forEach(li => {
+          const auth = li.dataset.auth || 'any';  // any, logged, guest
+          const requiredRole = li.dataset.role;
+
+          // Giriş yapılmamışsa
+          if (!currentUserId) {
+            li.style.display = (auth === 'any' || auth === 'guest') ? '' : 'none';
+            return;
+          }
+
+          // Giriş yapılmışsa
+          if (auth === 'guest') {
+            li.style.display = 'none';
+            return;
+          }
+
+          if (auth === 'any' || auth === 'logged') {
+            if (!requiredRole || roleIDs.includes(requiredRole)) {
+              li.style.display = '';
+            } else {
+              li.style.display = 'none';
+            }
+          }
+        });
 
         // Yetkilere göre görünürlük
         const isOwner = roleIDs.includes('1017854108662767666');
@@ -1085,6 +1120,9 @@
         }
 
         if (isAdminStaff) fetchAllUsers();
+
+        
+
         
         console.log('Kurucu mu?', isOwner);
         console.log('Log Moderatörü mü?', isLogModerator);
@@ -1094,7 +1132,9 @@
         userInfoDiv.innerHTML = `
           <img src="https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png" alt="Avatar" style="width: 48px; height: 48px; border-radius: 50%; margin-bottom: 8px;" />
           <div>${user.username}</div>
-          <a href="/logout" style="color: white; text-decoration: underline; display: block; margin-top: 10px;">Çıkış Yap</a>
+          <a href="/logout" style="color: white; text-decoration: underline; display: flex; align-items: center; justify-content: center; gap: 5px;">
+            <span class="material-icons">exit_to_app</span>
+          </a>
         `;
 
       } catch (e) {
