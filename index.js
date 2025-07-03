@@ -10,6 +10,8 @@
   const DiscordStrategy = require('passport-discord').Strategy;
   const { broadcastLog, clients } = require('./websocket');
 
+  await logger.initLogger();
+
   (async () => {
     const token = await getConfigValue("TOKEN");
     const sessionSecret = await getConfigValue("SESSION_SECRET");
