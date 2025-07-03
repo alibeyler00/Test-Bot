@@ -1,12 +1,14 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const logger = require('../utils/logger'); 
+const logger = require('../utils/logger');
+const { getConfigValue } = require('../configService');
 
 module.exports = (client) => {
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
   client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
       logger.debug('🔧 [DEBUG] guildMemberUpdate (timeout kontrolü) tetiklendi.');
 
-      const logChannel = newMember.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = newMember.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ [WARN] Log kanalı bulunamadı.');
         return;

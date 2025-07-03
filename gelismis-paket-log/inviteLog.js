@@ -1,12 +1,14 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
 const logger = require('../utils/logger');
+const { getConfigValue } = require('../configService');
 
 module.exports = (client) => {
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
   client.on('inviteCreate', async (invite) => {
     try {
       logger.debug('🔧 inviteCreate eventi tetiklendi.');
 
-      const logChannel = invite.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = invite.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
@@ -48,7 +50,7 @@ module.exports = (client) => {
     try {
       logger.debug('🔧 inviteDelete eventi tetiklendi.');
 
-      const logChannel = invite.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = invite.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;

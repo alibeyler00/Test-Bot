@@ -1,10 +1,12 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
 const logger = require('../utils/logger'); 
+const { getConfigValue } = require('../configService');
 
-module.exports = (client) => {
+module.exports = (client) => {,
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
   client.on('voiceStateUpdate', async (oldState, newState) => {
     try {
-      const logChannel = newState.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = newState.guild.channels.cache.get(logChannelId);
       if (!logChannel) return;
 
       const user = newState.member.user;

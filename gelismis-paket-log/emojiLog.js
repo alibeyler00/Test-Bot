@@ -1,12 +1,14 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
 const logger = require('../utils/logger');
+const { getConfigValue } = require('../configService');
 
 module.exports = (client) => {
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
   client.on('emojiCreate', async (emoji) => {
     try {
       logger.debug('🔧 emojiCreate eventi tetiklendi.');
 
-      const logChannel = emoji.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = emoji.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
@@ -49,7 +51,7 @@ module.exports = (client) => {
     try {
       logger.debug('🔧 emojiDelete eventi tetiklendi.');
 
-      const logChannel = emoji.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = emoji.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
@@ -91,7 +93,7 @@ module.exports = (client) => {
     try {
       logger.debug('🔧 emojiUpdate eventi tetiklendi.');
 
-      const logChannel = newEmoji.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = newEmoji.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;

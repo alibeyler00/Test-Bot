@@ -1,7 +1,9 @@
 const { EmbedBuilder } = require("discord.js");
 const logger = require("../utils/logger");
+const { getConfigValue } = require('../configService');
 
 module.exports = (client) => {
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
   client.on("messageDelete", async (msg) => {
     try {
       logger.debug("🗑️ Mesaj silindi eventi tetiklendi.");
@@ -21,7 +23,7 @@ module.exports = (client) => {
         return;
       }
 
-      const logChannel = msg.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = msg.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn("⚠️ Log kanalı bulunamadı.");
         return;
@@ -78,7 +80,7 @@ module.exports = (client) => {
         return;
       }
 
-      const logChannel = oldMsg.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = oldMsg.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn("⚠️ Log kanalı bulunamadı.");
         return;

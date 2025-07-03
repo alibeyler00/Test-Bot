@@ -1,7 +1,9 @@
 const { EmbedBuilder, PermissionsBitField, ChannelType } = require("discord.js");
 const logger = require("../utils/logger");
+const { getConfigValue } = require('../configService');
 
 module.exports = (client) => {
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
   const typeMap = {
     [ChannelType.GuildText]: "Metin Kanalı",
     [ChannelType.GuildVoice]: "Ses Kanalı",
@@ -11,7 +13,7 @@ module.exports = (client) => {
     [ChannelType.GuildForum]: "Forum Kanalı"
   };
 
-  const getLogChannel = (guild) => guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+  const getLogChannel = (guild) => guild.channels.cache.get(logChannelId);
 
   client.on("channelCreate", async (channel) => {
     try {

@@ -1,19 +1,27 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const logger = require('../utils/logger'); 
+const logger = require('../utils/logger');
+const { getConfigValue } = require('../configService');
 
-module.exports = (client) => {
+module.exports = async (client) => {
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
+
   client.on('guildUpdate', async (oldGuild, newGuild) => {
     try {
-      const logChannel = newGuild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = newGuild.channels.cache.get(logChannelId);
       if (!logChannel) return;
 
       let changes = [];
 
-      if (oldGuild.name !== newGuild.name) changes.push(`**Sunucu Adı:** \`${oldGuild.name}\` → \`${newGuild.name}\``);
-      if (oldGuild.icon !== newGuild.icon) changes.push('Sunucu ikonu değiştirildi.');
-      if (oldGuild.description !== newGuild.description) changes.push(`**Açıklama:** \`${oldGuild.description || "Yok"}\` → \`${newGuild.description || "Yok"}\``);
-      if (oldGuild.vanityURLCode !== newGuild.vanityURLCode) changes.push(`**Özel URL:** \`${oldGuild.vanityURLCode || "Yok"}\` → \`${newGuild.vanityURLCode || "Yok"}\``);
-      if (oldGuild.region !== newGuild.region) changes.push(`**Sunucu Bölgesi:** \`${oldGuild.region || "Bilinmiyor"}\` → \`${newGuild.region || "Bilinmiyor"}\``);
+      if (oldGuild.name !== newGuild.name)
+        changes.push(`**Sunucu Adı:** \`${oldGuild.name}\` → \`${newGuild.name}\``);
+      if (oldGuild.icon !== newGuild.icon)
+        changes.push('🖼️ Sunucu ikonu değiştirildi.');
+      if (oldGuild.description !== newGuild.description)
+        changes.push(`**Açıklama:** \`${oldGuild.description || "Yok"}\` → \`${newGuild.description || "Yok"}\``);
+      if (oldGuild.vanityURLCode !== newGuild.vanityURLCode)
+        changes.push(`**Özel URL:** \`${oldGuild.vanityURLCode || "Yok"}\` → \`${newGuild.vanityURLCode || "Yok"}\``);
+      if (oldGuild.region !== newGuild.region)
+        changes.push(`**Sunucu Bölgesi:** \`${oldGuild.region || "Bilinmiyor"}\` → \`${newGuild.region || "Bilinmiyor"}\``);
 
       if (changes.length === 0) {
         logger.info('ℹ️ [INFO] Sunucu ayarlarında değişiklik yok, log atlanıyor.');
@@ -24,7 +32,9 @@ module.exports = (client) => {
       try {
         const audit = await newGuild.fetchAuditLogs({ type: AuditLogEvent.GuildUpdate, limit: 1 });
         const entry = audit.entries.first();
-        if (entry && entry.executor) executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
+        if (entry && entry.executor) {
+          executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
+        }
       } catch (err) {
         logger.warn(`⚠️ [WARN] Sunucu güncelleme denetim kayıtları alınamadı: ${err.message}`);
       }

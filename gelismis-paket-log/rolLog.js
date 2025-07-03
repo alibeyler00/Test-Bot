@@ -1,12 +1,14 @@
 const { EmbedBuilder, AuditLogEvent, PermissionsBitField } = require('discord.js');
 const logger = require('../utils/logger');
+const { getConfigValue } = require('../configService');
 
 module.exports = (client) => {
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
   client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
       logger.debug('🔧 guildMemberUpdate eventi tetiklendi.');
 
-      const logChannel = newMember.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = newMember.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
@@ -64,7 +66,7 @@ module.exports = (client) => {
     try {
       logger.debug('📝 roleCreate eventi tetiklendi.');
 
-      const logChannel = role.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = role.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
@@ -125,7 +127,7 @@ module.exports = (client) => {
     try {
       logger.debug('🗑️ roleDelete eventi tetiklendi.');
 
-      const logChannel = role.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = role.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
@@ -163,7 +165,7 @@ module.exports = (client) => {
     try {
       logger.debug('✏️ roleUpdate eventi tetiklendi.');
 
-      const logChannel = newRole.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = newRole.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;

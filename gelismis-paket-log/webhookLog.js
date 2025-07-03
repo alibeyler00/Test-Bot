@@ -1,10 +1,12 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
 const logger = require('../utils/logger'); 
+const { getConfigValue } = require('../configService');
 
 module.exports = (client) => {
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
   client.on('webhookUpdate', async (channel) => {
     try {
-      const logChannel = channel.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = channel.guild.channels.cache.get(logChannelId);
       if (!logChannel) return;
 
       const auditTypes = [

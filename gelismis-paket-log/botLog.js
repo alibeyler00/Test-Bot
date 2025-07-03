@@ -1,7 +1,9 @@
 const { EmbedBuilder } = require('discord.js');
 const logger = require('../utils/logger'); 
+const { getConfigValue } = require('../configService');
 
 module.exports = (client) => {
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
   client.on('guildMemberAdd', async (member) => {
     try {
       logger.debug('🔧 guildMemberAdd eventi tetiklendi.');
@@ -11,7 +13,7 @@ module.exports = (client) => {
         return;
       }
 
-      const logChannel = member.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = member.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
@@ -43,7 +45,7 @@ module.exports = (client) => {
         return;
       }
 
-      const logChannel = member.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = member.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;

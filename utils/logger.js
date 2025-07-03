@@ -1,5 +1,9 @@
 const { broadcastLog } = require('../websocket');
-const ENABLE_WS = process.env.ENABLE_WEBSOCKET_LOGS === 'true';
+const { getConfigValue } = require('../configService');
+
+const WS_LOGS = await getConfigValue('ENABLE_WEBSOCKET_LOGS');
+
+const ENABLE_WS = WS_LOGS === 'true';
 
 function formatLog(level, ...args) {
   const time = new Date().toLocaleTimeString('tr-TR');

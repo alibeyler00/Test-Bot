@@ -1,12 +1,14 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
 const logger = require('../utils/logger');
+const { getConfigValue } = require('../configService');
 
 module.exports = (client) => {
+  const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
   client.on('guildBanAdd', async (ban) => {
     try {
       logger.debug('🔧 guildBanAdd eventi tetiklendi.');
 
-      const logChannel = ban.guild.channels.cache.get(process.env.LOG_CHANNEL_ID);
+      const logChannel = ban.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
         logger.warn('⚠️ Log kanalı bulunamadı.');
         return;
