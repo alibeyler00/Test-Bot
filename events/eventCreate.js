@@ -3,6 +3,21 @@ const { getConfigValue } = require('../configService');
 
 module.exports = async (client) => {
   client.on('interactionCreate', async (interaction) => {
+    if (interaction.isChatInputCommand()) {
+      const command = interaction.client.commands.get(interaction.commandName);
+      if (!command) return;
+
+      try {
+        await command.execute(interaction);
+      } catch (error) {
+        console.error(error);
+        await interaction.reply({
+          content: '❌ Komut çalıştırılırken bir hata oluştu.',
+          ephemeral: true,
+        });
+      }
+    }
+    
     if (!interaction.isButton()) return;
 
     const guild = interaction.guild;

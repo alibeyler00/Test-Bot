@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
 const { getConfigValue } = require('./configService');
 const fs = require('fs');
 const path = require('path');
@@ -26,6 +26,7 @@ const path = require('path');
     partials: [Partials.Message, Partials.Channel, Partials.Reaction],
   });
 
+  client.commands = new Collection();
   client._loadedEvents = [];
 
   client.once('ready', () => {
@@ -55,7 +56,24 @@ const path = require('path');
     }
   }
 
+  function registerCommandsFrom(folder) {
+    if (!fs.existsSync(folder)) return;
+
+    const commandFiles = fs.readdirSync(folder).filter(file => file.endsWith('.js'));
+    for (const file of commandFiles) {
+      const command = require(path.join(folder, file));
+      if (command.data && typeof command.execute === 'function') {
+        client.commands.set(command.data.name, command);
+        console.log(`[✅] Komut yüklendi: ${command.data.name}`);
+      } else {
+        console.warn(`[UYARI] Geçersiz komut yapısı: ${file}`);
+      }
+    }
+  }
+
+  registerCommandsFrom(path.join(__dirname, 'commands'));
   registerEventsFrom(path.join(__dirname, 'gelismis-paket-log'));
+  registerEventsFrom(path.join(__dirname, 'events'));
 
   await client.login(token);
 })();
