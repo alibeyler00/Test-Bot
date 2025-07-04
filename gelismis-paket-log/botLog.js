@@ -1,21 +1,19 @@
 const { EmbedBuilder } = require('discord.js');
-const logger = require('../utils/logger'); 
 const { getConfigValue } = require('../configService');
 
-module.exports = (client) => {
+module.exports = async (client) => {
   const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
+
   client.on('guildMemberAdd', async (member) => {
     try {
-      logger.debug('🔧 guildMemberAdd eventi tetiklendi.');
-
       if (!member.user.bot) {
-        logger.info('ℹ️ Sunucuya katılan kişi bot değil, işlem yapılmayacak.');
+        console.log('ℹ️ Sunucuya katılan kişi bot değil, işlem yapılmayacak.');
         return;
       }
 
       const logChannel = member.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -30,24 +28,22 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      logger.log('✅ Bot sunucuya katılma logu başarıyla gönderildi.');
+      console.log('✅ Bot sunucuya katılma logu başarıyla gönderildi.');
     } catch (err) {
-      logger.error('❌ guildMemberAdd log hatası:', err);
+      console.error('❌ guildMemberAdd log hatası:', err);
     }
   });
 
   client.on('guildMemberRemove', async (member) => {
     try {
-      logger.debug('🔧 guildMemberRemove eventi tetiklendi.');
-
       if (!member.user.bot) {
-        logger.info('ℹ️ Sunucudan ayrılan kişi bot değil, işlem yapılmayacak.');
+        console.log('ℹ️ Sunucudan ayrılan kişi bot değil, işlem yapılmayacak.');
         return;
       }
 
       const logChannel = member.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -62,9 +58,9 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      logger.log('✅ Bot sunucudan ayrılma logu başarıyla gönderildi.');
+      console.log('✅ Bot sunucudan ayrılma logu başarıyla gönderildi.');
     } catch (err) {
-      logger.error('❌ guildMemberRemove log hatası:', err);
+      console.error('❌ guildMemberRemove log hatası:', err);
     }
   });
 };

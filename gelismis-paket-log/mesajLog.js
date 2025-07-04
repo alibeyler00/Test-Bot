@@ -1,31 +1,39 @@
 const { EmbedBuilder } = require("discord.js");
-const logger = require("../utils/logger");
 const { getConfigValue } = require('../configService');
 
-module.exports = (client) => {
+module.exports = async (client) => {
+  console.log('⚙️ messageDelete & messageUpdate log sistemi başlatılıyor...');
   const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
+  console.log(`🔑 Log kanalı ID alındı: ${logChannelId}`);
+
   client.on("messageDelete", async (msg) => {
     try {
-      logger.debug("🗑️ Mesaj silindi eventi tetiklendi.");
+      console.log('🗑️ messageDelete eventi tetiklendi.');
 
       if (msg.partial) {
         try {
-          logger.debug("🧩 Mesaj partial, fetch ediliyor...");
+          console.log('🧩 Partial mesaj tespit edildi, fetch ediliyor...');
           await msg.fetch();
+          console.log('✅ Mesaj fetch işlemi başarılı.');
         } catch (err) {
-          logger.warn("⚠️ Mesaj fetch başarısız (muhtemelen silinmiş): " + err.message);
+          console.warn('⚠️ Mesaj fetch başarısız (muhtemelen silinmiş):', err.message);
           return;
         }
       }
 
-      if (!msg.guild || msg.author?.bot) {
-        logger.debug("ℹ️ Geçersiz sunucu veya bot mesajı, işlem iptal.");
+      if (!msg.guild) {
+        console.log('ℹ️ Mesaj sunucuya ait değil, işlem iptal.');
+        return;
+      }
+
+      if (msg.author?.bot) {
+        console.log('ℹ️ Mesaj bot tarafından gönderilmiş, işlem iptal.');
         return;
       }
 
       const logChannel = msg.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn("⚠️ Log kanalı bulunamadı.");
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -49,40 +57,45 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      logger.log("✅ Mesaj silme logu başarıyla gönderildi.");
+      console.log('✅ Mesaj silme logu başarıyla gönderildi.');
     } catch (err) {
-      logger.error("❌ Mesaj silme log hatası:", err);
+      console.error('❌ Mesaj silme log hatası:', err);
     }
   });
 
   client.on("messageUpdate", async (oldMsg, newMsg) => {
     try {
-      logger.debug("✏️ Mesaj güncelleme eventi tetiklendi.");
+      console.log('✏️ messageUpdate eventi tetiklendi.');
 
-      if (oldMsg.partial || newMsg.partial) {
-        try {
-          logger.debug("🧩 Partial mesaj tespit edildi, fetch ediliyor...");
-          if (oldMsg.partial) await oldMsg.fetch();
-          if (newMsg.partial) await newMsg.fetch();
-        } catch (err) {
-          logger.warn("⚠️ Mesaj fetch başarısız (muhtemelen silinmiş): " + err.message);
-          return;
-        }
+      if (oldMsg.partial) {
+        console.log('🧩 Eski mesaj partial, fetch ediliyor...');
+        await oldMsg.fetch();
+        console.log('✅ Eski mesaj fetch başarılı.');
+      }
+      if (newMsg.partial) {
+        console.log('🧩 Yeni mesaj partial, fetch ediliyor...');
+        await newMsg.fetch();
+        console.log('✅ Yeni mesaj fetch başarılı.');
       }
 
-      if (!oldMsg.guild || oldMsg.author?.bot) {
-        logger.debug("ℹ️ Geçersiz sunucu veya bot mesajı, işlem iptal.");
+      if (!oldMsg.guild) {
+        console.log('ℹ️ Mesaj sunucuya ait değil, işlem iptal.');
+        return;
+      }
+
+      if (oldMsg.author?.bot) {
+        console.log('ℹ️ Mesaj bot tarafından gönderilmiş, işlem iptal.');
         return;
       }
 
       if (oldMsg.content === newMsg.content) {
-        logger.info("🔍 Mesaj içeriği değişmemiş, log gönderilmiyor.");
+        console.log('ℹ️ Mesaj içeriği değişmemiş, log gönderilmiyor.');
         return;
       }
 
       const logChannel = oldMsg.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn("⚠️ Log kanalı bulunamadı.");
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -110,9 +123,9 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      logger.log("✅ Mesaj düzenleme logu başarıyla gönderildi.");
+      console.log('✅ Mesaj düzenleme logu başarıyla gönderildi.');
     } catch (err) {
-      logger.error("❌ Mesaj düzenleme log hatası:", err);
+      console.error('❌ Mesaj düzenleme log hatası:', err);
     }
   });
 };

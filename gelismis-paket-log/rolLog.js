@@ -1,16 +1,18 @@
 const { EmbedBuilder, AuditLogEvent, PermissionsBitField } = require('discord.js');
-const logger = require('../utils/logger');
 const { getConfigValue } = require('../configService');
 
-module.exports = (client) => {
+module.exports = async (client) => {
+  console.log('⚙️ Rol log sistemi başlatılıyor...');
   const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
+  console.log(`🔑 Log kanalı ID alındı: ${logChannelId}`);
+
   client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
-      logger.debug('🔧 guildMemberUpdate eventi tetiklendi.');
+      console.log('🔧 guildMemberUpdate eventi tetiklendi.');
 
       const logChannel = newMember.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -21,7 +23,7 @@ module.exports = (client) => {
       const removedRoles = oldRoles.filter(role => !newRoles.has(role.id));
 
       if (addedRoles.size === 0 && removedRoles.size === 0) {
-        logger.debug('ℹ️ Rol değişikliği yok, log atlanıyor.');
+        console.log('ℹ️ Rol değişikliği yok, log atlanıyor.');
         return;
       }
 
@@ -31,10 +33,10 @@ module.exports = (client) => {
         const entry = auditLogs.entries.find(e => e.target.id === newMember.id);
         if (entry && entry.executor) {
           executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
-          logger.debug(`✅ Yetkili bulundu: ${executor}`);
+          console.log(`✅ Yetkili bulundu: ${executor}`);
         }
       } catch (err) {
-        logger.warn('⚠️ Rol güncelleme denetim kayıtları alınamadı:', err.message);
+        console.warn('⚠️ Rol güncelleme denetim kayıtları alınamadı:', err.message);
       }
 
       const embed = new EmbedBuilder()
@@ -56,19 +58,19 @@ module.exports = (client) => {
       }
 
       await logChannel.send({ embeds: [embed] });
-      logger.info('✅ Rol güncelleme logu gönderildi.');
+      console.log('✅ Rol güncelleme logu gönderildi.');
     } catch (err) {
-      logger.error('❌ guildMemberUpdate log hatası:', err);
+      console.error('❌ guildMemberUpdate log hatası:', err);
     }
   });
 
   client.on('roleCreate', async (role) => {
     try {
-      logger.debug('📝 roleCreate eventi tetiklendi.');
+      console.log('📝 roleCreate eventi tetiklendi.');
 
       const logChannel = role.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -78,10 +80,10 @@ module.exports = (client) => {
         const entry = audit.entries.first();
         if (entry && entry.executor) {
           executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
-          logger.debug(`✅ Rolü oluşturan yetkili: ${executor}`);
+          console.log(`✅ Rolü oluşturan yetkili: ${executor}`);
         }
       } catch (err) {
-        logger.warn('⚠️ Rol oluşturma denetim kayıtları alınamadı:', err.message);
+        console.warn('⚠️ Rol oluşturma denetim kayıtları alınamadı:', err.message);
       }
 
       const embed = new EmbedBuilder()
@@ -116,20 +118,20 @@ module.exports = (client) => {
           .setTimestamp();
 
         await logChannel.send({ embeds: [warnEmbed] });
-        logger.warn('⚠️ Tehlikeli izin uyarısı gönderildi.');
+        console.warn('⚠️ Tehlikeli izin uyarısı gönderildi.');
       }
     } catch (err) {
-      logger.error('❌ roleCreate log hatası:', err);
+      console.error('❌ roleCreate log hatası:', err);
     }
   });
 
   client.on('roleDelete', async (role) => {
     try {
-      logger.debug('🗑️ roleDelete eventi tetiklendi.');
+      console.log('🗑️ roleDelete eventi tetiklendi.');
 
       const logChannel = role.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -139,10 +141,10 @@ module.exports = (client) => {
         const entry = audit.entries.first();
         if (entry && entry.executor) {
           executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
-          logger.debug(`✅ Rolü silen yetkili: ${executor}`);
+          console.log(`✅ Rolü silen yetkili: ${executor}`);
         }
       } catch (err) {
-        logger.warn('⚠️ Rol silme denetim kayıtları alınamadı:', err.message);
+        console.warn('⚠️ Rol silme denetim kayıtları alınamadı:', err.message);
       }
 
       const embed = new EmbedBuilder()
@@ -155,19 +157,19 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      logger.info('✅ Rol silme logu gönderildi.');
+      console.log('✅ Rol silme logu gönderildi.');
     } catch (err) {
-      logger.error('❌ roleDelete log hatası:', err);
+      console.error('❌ roleDelete log hatası:', err);
     }
   });
 
   client.on('roleUpdate', async (oldRole, newRole) => {
     try {
-      logger.debug('✏️ roleUpdate eventi tetiklendi.');
+      console.log('✏️ roleUpdate eventi tetiklendi.');
 
       const logChannel = newRole.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -189,7 +191,7 @@ module.exports = (client) => {
       }
 
       if (changes.length === 0) {
-        logger.debug('ℹ️ Rolde anlamlı bir değişiklik yok, log atlanıyor.');
+        console.log('ℹ️ Rolde anlamlı bir değişiklik yok, log atlanıyor.');
         return;
       }
 
@@ -199,10 +201,10 @@ module.exports = (client) => {
         const entry = audit.entries.first();
         if (entry && entry.executor) {
           executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
-          logger.debug(`✅ Rolü güncelleyen yetkili: ${executor}`);
+          console.log(`✅ Rolü güncelleyen yetkili: ${executor}`);
         }
       } catch (err) {
-        logger.warn('⚠️ Rol güncelleme denetim kayıtları alınamadı:', err.message);
+        console.warn('⚠️ Rol güncelleme denetim kayıtları alınamadı:', err.message);
       }
 
       const embed = new EmbedBuilder()
@@ -216,9 +218,9 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      logger.info('✅ Rol güncelleme logu gönderildi.');
+      console.log('✅ Rol güncelleme logu gönderildi.');
     } catch (err) {
-      logger.error('❌ roleUpdate log hatası:', err);
+      console.error('❌ roleUpdate log hatası:', err);
     }
   });
 };

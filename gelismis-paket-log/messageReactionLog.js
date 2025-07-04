@@ -1,20 +1,28 @@
 const { EmbedBuilder } = require('discord.js');
-const logger = require('../utils/logger');
 const { getConfigValue } = require('../configService');
 
-module.exports = (client) => {
+module.exports = async (client) => {
+  console.log('⚙️ messageReactionAdd & messageReactionRemove log sistemi başlatılıyor...');
   const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
+  console.log(`🔑 Log kanalı ID alındı: ${logChannelId}`);
+
   client.on('messageReactionAdd', async (reaction, user) => {
     try {
-      logger.debug('➕ Reaksiyon eklendi eventi tetiklendi.');
+      console.log('➕ messageReactionAdd eventi tetiklendi.');
 
-      if (user.bot) return;
+      if (user.bot) {
+        console.log('ℹ️ Reaksiyonu bot ekledi, işlem iptal.');
+        return;
+      }
       const msg = reaction.message;
-      if (!msg.guild) return;
+      if (!msg.guild) {
+        console.log('ℹ️ Mesaj sunucuya ait değil, işlem iptal.');
+        return;
+      }
 
       const logChannel = msg.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -29,23 +37,29 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      logger.log('✅ Reaksiyon ekleme logu başarıyla gönderildi.');
+      console.log('✅ Reaksiyon ekleme logu başarıyla gönderildi.');
     } catch (err) {
-      logger.error('❌ messageReactionAdd log hatası:', err);
+      console.error('❌ messageReactionAdd log hatası:', err);
     }
   });
 
   client.on('messageReactionRemove', async (reaction, user) => {
     try {
-      logger.debug('➖ Reaksiyon kaldırıldı eventi tetiklendi.');
+      console.log('➖ messageReactionRemove eventi tetiklendi.');
 
-      if (user.bot) return;
+      if (user.bot) {
+        console.log('ℹ️ Reaksiyonu bot kaldırdı, işlem iptal.');
+        return;
+      }
       const msg = reaction.message;
-      if (!msg.guild) return;
+      if (!msg.guild) {
+        console.log('ℹ️ Mesaj sunucuya ait değil, işlem iptal.');
+        return;
+      }
 
       const logChannel = msg.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -60,9 +74,9 @@ module.exports = (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      logger.log('✅ Reaksiyon kaldırma logu başarıyla gönderildi.');
+      console.log('✅ Reaksiyon kaldırma logu başarıyla gönderildi.');
     } catch (err) {
-      logger.error('❌ messageReactionRemove log hatası:', err);
+      console.error('❌ messageReactionRemove log hatası:', err);
     }
   });
 };

@@ -1,13 +1,18 @@
-const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const logger = require('../utils/logger'); 
+const { EmbedBuilder } = require('discord.js');
 const { getConfigValue } = require('../configService');
 
-module.exports = (client) => {,
+module.exports = async (client) => {
+  console.log('⏳ voiceStateUpdate log sistemi başlatılıyor...');
   const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
+  console.log(`🔑 Log kanalı ID: ${logChannelId}`);
+
   client.on('voiceStateUpdate', async (oldState, newState) => {
     try {
       const logChannel = newState.guild.channels.cache.get(logChannelId);
-      if (!logChannel) return;
+      if (!logChannel) {
+        console.warn('⚠️ Log kanalı bulunamadı.');
+        return;
+      }
 
       const user = newState.member.user;
       const embed = new EmbedBuilder()
@@ -24,7 +29,7 @@ module.exports = (client) => {,
           );
 
         await logChannel.send({ embeds: [embed] });
-        logger.info(`✅ ${user.tag} ses kanalına katıldı.`);
+        console.log(`✅ ${user.tag} ses kanalına katıldı.`);
         return;
       }
 
@@ -38,7 +43,7 @@ module.exports = (client) => {,
           );
 
         await logChannel.send({ embeds: [embed] });
-        logger.info(`✅ ${user.tag} ses kanalından ayrıldı.`);
+        console.log(`✅ ${user.tag} ses kanalından ayrıldı.`);
         return;
       }
 
@@ -53,7 +58,7 @@ module.exports = (client) => {,
           );
 
         await logChannel.send({ embeds: [embed] });
-        logger.info(`✅ ${user.tag} ses kanalı değiştirdi.`);
+        console.log(`✅ ${user.tag} ses kanalı değiştirdi.`);
         return;
       }
 
@@ -67,7 +72,7 @@ module.exports = (client) => {,
           );
 
         await logChannel.send({ embeds: [embed] });
-        logger.info(`✅ ${user.tag} mikrofon durumunu değiştirdi.`);
+        console.log(`✅ ${user.tag} mikrofon durumunu değiştirdi.`);
         return;
       }
 
@@ -81,7 +86,7 @@ module.exports = (client) => {,
           );
 
         await logChannel.send({ embeds: [embed] });
-        logger.info(`✅ ${user.tag} kulaklık durumunu değiştirdi.`);
+        console.log(`✅ ${user.tag} kulaklık durumunu değiştirdi.`);
         return;
       }
 
@@ -95,7 +100,7 @@ module.exports = (client) => {,
           );
 
         await logChannel.send({ embeds: [embed] });
-        logger.info(`✅ ${user.tag} sunucu mikrofon durumunu değiştirdi.`);
+        console.log(`✅ ${user.tag} sunucu mikrofon durumunu değiştirdi.`);
         return;
       }
 
@@ -109,11 +114,11 @@ module.exports = (client) => {,
           );
 
         await logChannel.send({ embeds: [embed] });
-        logger.info(`✅ ${user.tag} sunucu kulaklık durumunu değiştirdi.`);
+        console.log(`✅ ${user.tag} sunucu kulaklık durumunu değiştirdi.`);
         return;
       }
     } catch (error) {
-      logger.error('❌ [HATA] voiceStateUpdate log hatası:', error);
+      console.error('❌ voiceStateUpdate log hatası:', error);
     }
   });
 };

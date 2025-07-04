@@ -1,5 +1,4 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const logger = require('../utils/logger');
 const { getConfigValue } = require('../configService');
 
 module.exports = async (client) => {
@@ -24,7 +23,7 @@ module.exports = async (client) => {
         changes.push(`**Sunucu Bölgesi:** \`${oldGuild.region || "Bilinmiyor"}\` → \`${newGuild.region || "Bilinmiyor"}\``);
 
       if (changes.length === 0) {
-        logger.info('ℹ️ [INFO] Sunucu ayarlarında değişiklik yok, log atlanıyor.');
+        // Değişiklik yoksa işlem yok
         return;
       }
 
@@ -35,8 +34,8 @@ module.exports = async (client) => {
         if (entry && entry.executor) {
           executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
         }
-      } catch (err) {
-        logger.warn(`⚠️ [WARN] Sunucu güncelleme denetim kayıtları alınamadı: ${err.message}`);
+      } catch {
+        // Audit log alınamazsa sessiz geç
       }
 
       const embed = new EmbedBuilder()
@@ -47,9 +46,10 @@ module.exports = async (client) => {
         .setTimestamp();
 
       await logChannel.send({ embeds: [embed] });
-      logger.info('✅ Sunucu güncelleme logu gönderildi.');
+
     } catch (error) {
-      logger.error('❌ [HATA] guildUpdate log hatası:', error);
+      // Hata varsa konsola yaz (logger yok)
+      console.error('guildUpdate log hatası:', error);
     }
   });
 };

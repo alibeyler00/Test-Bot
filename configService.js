@@ -17,6 +17,7 @@ async function loadConfig() {
 
   config = {};
   rows.forEach(({ name, value }) => {
+    console.log(`Config değeri alındı: ${name} = ${value}`);
     config[name] = value;
   });
 
@@ -32,3 +33,4 @@ module.exports = {
   loadConfig,
   getConfigValue
 };
+

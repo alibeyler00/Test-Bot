@@ -1,16 +1,18 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const logger = require('../utils/logger');
 const { getConfigValue } = require('../configService');
 
-module.exports = (client) => {
+module.exports = async (client) => {
+  console.log('⏳ Timeout log sistemi başlatılıyor...');
   const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
+  console.log(`🔑 Log kanalı ID alındı: ${logChannelId}`);
+
   client.on('guildMemberUpdate', async (oldMember, newMember) => {
     try {
-      logger.debug('🔧 [DEBUG] guildMemberUpdate (timeout kontrolü) tetiklendi.');
+      console.log('🔧 guildMemberUpdate (timeout kontrolü) tetiklendi.');
 
       const logChannel = newMember.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -18,7 +20,7 @@ module.exports = (client) => {
       const newTimeout = newMember.communicationDisabledUntilTimestamp;
 
       if (oldTimeout === newTimeout) {
-        logger.info('ℹ️ [INFO] Timeout verisi değişmedi, işlem yapılmıyor.');
+        console.info('ℹ️ Timeout verisi değişmedi, işlem yapılmıyor.');
         return;
       }
 
@@ -36,12 +38,12 @@ module.exports = (client) => {
 
         if (entry && entry.executor) {
           executor = `${entry.executor.tag} (\`${entry.executor.id}\`)`;
-          logger.info(`✅ [INFO] Timeout işlemi yapan kişi: ${executor}`);
+          console.info(`✅ Timeout işlemi yapan kişi: ${executor}`);
         } else {
-          logger.info('ℹ️ [INFO] Timeout yapan yetkili denetim kaydında bulunamadı.');
+          console.info('ℹ️ Timeout yapan yetkili denetim kaydında bulunamadı.');
         }
       } catch (err) {
-        logger.warn('⚠️ [WARN] Denetim kayıtları alınamadı:', err.message);
+        console.warn('⚠️ Denetim kayıtları alınamadı:', err.message);
       }
 
       if (newTimeout && (!oldTimeout || newTimeout > oldTimeout)) {
@@ -58,7 +60,7 @@ module.exports = (client) => {
           .setFooter({ text: `Sunucu: ${newMember.guild.name}` });
 
         await logChannel.send({ embeds: [embed] });
-        logger.info('✅ [LOG] Timeout verildi logu gönderildi.');
+        console.log('✅ Timeout verildi logu gönderildi.');
       } else if (!newTimeout && oldTimeout) {
         const embed = new EmbedBuilder()
           .setTitle('⏳ Timeout Kaldırıldı')
@@ -72,12 +74,12 @@ module.exports = (client) => {
           .setFooter({ text: `Sunucu: ${newMember.guild.name}` });
 
         await logChannel.send({ embeds: [embed] });
-        logger.info('✅ [LOG] Timeout kaldırıldı logu gönderildi.');
+        console.log('✅ Timeout kaldırıldı logu gönderildi.');
       } else {
-        logger.info('ℹ️ [INFO] Timeout durumu anlamlı şekilde değişmedi, log gönderilmiyor.');
+        console.info('ℹ️ Timeout durumu anlamlı şekilde değişmedi, log gönderilmiyor.');
       }
     } catch (err) {
-      logger.error('❌ [HATA] Timeout log hatası:', err);
+      console.error('❌ Timeout log hatası:', err);
     }
   });
 };

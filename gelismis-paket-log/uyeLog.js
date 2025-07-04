@@ -1,16 +1,18 @@
 const { EmbedBuilder } = require('discord.js');
-const logger = require('../utils/logger'); 
 const { getConfigValue } = require('../configService');
 
-module.exports = (client) => {
+module.exports = async (client) => {
+  console.log('⏳ Kullanıcı giriş/çıkış log sistemi başlatılıyor...');
   const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
-  client.on('guildMemberAdd', (member) => {
+  console.log(`🔑 Log kanalı ID: ${logChannelId}`);
+
+  client.on('guildMemberAdd', async (member) => {
     try {
-      logger.debug('🟢 [DEBUG] guildMemberAdd tetiklendi.');
+      console.log('🟢 guildMemberAdd tetiklendi.');
 
       const logChannel = member.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -26,20 +28,20 @@ module.exports = (client) => {
         .setTimestamp()
         .setFooter({ text: `Sunucu: ${member.guild.name}` });
 
-      logChannel.send({ embeds: [embed] });
-      logger.info('✅ [LOG] Kullanıcı giriş logu gönderildi.');
+      await logChannel.send({ embeds: [embed] });
+      console.log('✅ Kullanıcı giriş logu gönderildi.');
     } catch (err) {
-      logger.error('❌ [HATA] Kullanıcı katılım log hatası:', err);
+      console.error('❌ Kullanıcı katılım log hatası:', err);
     }
   });
 
-  client.on('guildMemberRemove', (member) => {
+  client.on('guildMemberRemove', async (member) => {
     try {
-      logger.debug('🔴 [DEBUG] guildMemberRemove tetiklendi.');
+      console.log('🔴 guildMemberRemove tetiklendi.');
 
       const logChannel = member.guild.channels.cache.get(logChannelId);
       if (!logChannel) {
-        logger.warn('⚠️ [WARN] Log kanalı bulunamadı.');
+        console.warn('⚠️ Log kanalı bulunamadı.');
         return;
       }
 
@@ -59,10 +61,10 @@ module.exports = (client) => {
         .setTimestamp()
         .setFooter({ text: `Sunucu: ${member.guild.name}` });
 
-      logChannel.send({ embeds: [embed] });
-      logger.info('✅ [LOG] Kullanıcı çıkış logu gönderildi.');
+      await logChannel.send({ embeds: [embed] });
+      console.log('✅ Kullanıcı çıkış logu gönderildi.');
     } catch (err) {
-      logger.error('❌ [HATA] Kullanıcı ayrılma log hatası:', err);
+      console.error('❌ Kullanıcı ayrılma log hatası:', err);
     }
   });
 };

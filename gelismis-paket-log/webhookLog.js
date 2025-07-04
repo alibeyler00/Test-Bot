@@ -1,13 +1,18 @@
 const { EmbedBuilder, AuditLogEvent } = require('discord.js');
-const logger = require('../utils/logger'); 
 const { getConfigValue } = require('../configService');
 
-module.exports = (client) => {
+module.exports = async (client) => {
+  console.log('⏳ webhookUpdate log sistemi başlatılıyor...');
   const logChannelId = await getConfigValue('LOG_CHANNEL_ID');
+  console.log(`🔑 Log kanalı ID: ${logChannelId}`);
+
   client.on('webhookUpdate', async (channel) => {
     try {
       const logChannel = channel.guild.channels.cache.get(logChannelId);
-      if (!logChannel) return;
+      if (!logChannel) {
+        console.warn('⚠️ Log kanalı bulunamadı.');
+        return;
+      }
 
       const auditTypes = [
         AuditLogEvent.WebhookCreate,
@@ -25,7 +30,7 @@ module.exports = (client) => {
             break;
           }
         } catch (err) {
-          logger.warn(`⚠️ Denetim kayıtları alınamadı (type: ${type}): ${err.message}`);
+          console.warn(`⚠️ Denetim kayıtları alınamadı (type: ${type}): ${err.message}`);
         }
       }
 
@@ -70,9 +75,9 @@ module.exports = (client) => {
       }
 
       await logChannel.send({ embeds: [embed] });
-      logger.info(`✅ Webhook logu gönderildi: ${title}`);
+      console.log(`✅ Webhook logu gönderildi: ${title}`);
     } catch (error) {
-      logger.error('❌ [HATA] webhookUpdate log hatası:', error);
+      console.error('❌ webhookUpdate log hatası:', error);
     }
   });
 };
