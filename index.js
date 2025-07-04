@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, Collection, REST, Routes } = require('discord.js');
 const { getConfigValue } = require('./configService');
 const fs = require('fs');
 const path = require('path');
@@ -29,16 +29,11 @@ const path = require('path');
   client.commands = new Collection();
   client._loadedEvents = [];
 
-  client.once('ready', () => {
-    console.log(`${client.user.tag} aktif!`);
-  });
-
   function registerEventsFrom(folder) {
     if (!fs.existsSync(folder)) {
       console.warn(`[UYARI] ${folder} klasörü bulunamadı!`);
       return;
     }
-
     const files = fs.readdirSync(folder);
     for (const file of files) {
       if (file.endsWith('.js')) {
@@ -58,7 +53,6 @@ const path = require('path');
 
   function registerCommandsFrom(folder) {
     if (!fs.existsSync(folder)) return;
-
     const commandFiles = fs.readdirSync(folder).filter(file => file.endsWith('.js'));
     for (const file of commandFiles) {
       const command = require(path.join(folder, file));
@@ -74,6 +68,28 @@ const path = require('path');
   registerCommandsFrom(path.join(__dirname, 'commands'));
   registerEventsFrom(path.join(__dirname, 'gelismis-paket-log'));
   registerEventsFrom(path.join(__dirname, 'events'));
+
+  client.once('ready', async () => {
+    console.log(`${client.user.tag} aktif!`);
+
+    // Slash komutlarını global olarak Discord'a kaydet
+    const clientId = client.user.id;
+    const rest = new REST({ version: '10' }).setToken(token);
+
+    const commandsJson = [];
+    client.commands.forEach(cmd => commandsJson.push(cmd.data.toJSON()));
+
+    try {
+      console.log('🔄 Slash komutları global olarak kaydediliyor...');
+      await rest.put(
+        Routes.applicationCommands(clientId),
+        { body: commandsJson }
+      );
+      console.log('✅ Slash komutları global olarak başarıyla kaydedildi.');
+    } catch (error) {
+      console.error('Slash komut kayıt hatası:', error);
+    }
+  });
 
   await client.login(token);
 })();
