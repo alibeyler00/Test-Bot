@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder, StringSelectMenuBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const { getConfigValue } = require('../configService');
 
 module.exports = {
@@ -17,34 +17,20 @@ module.exports = {
     }
 
     const embed = new EmbedBuilder()
-      .setTitle('🎫 Destek Talebi Oluştur')
-      .setDescription('Aşağıdan bir kategori seçerek destek talebi oluşturabilirsin.')
-      .setColor('Blurple');
+      .setTitle('🎫 Destek Talebi Aç')
+      .setDescription('Bir sorun yaşıyorsan aşağıdaki butona tıklayarak destek talebi oluşturabilirsin.')
+      .setColor('Blurple')
+      .setFooter({ text: interaction.guild.name, iconURL: interaction.guild.iconURL() });
 
-    const selectMenu = new StringSelectMenuBuilder()
-      .setCustomId('select_ticket_category')
-      .setPlaceholder('Bir kategori seçin...')
-      .addOptions([
-        {
-          label: '🎧 Genel Destek',
-          value: 'genel_destek',
-          description: 'Genel bir destek talebi oluştur.',
-        },
-        {
-          label: '🛠️ Teknik Sorun',
-          value: 'teknik_sorun',
-          description: 'Teknik bir sorun bildir.',
-        },
-        {
-          label: '📩 Başvuru',
-          value: 'basvuru',
-          description: 'Bir pozisyona başvur.',
-        }
-      ]);
+    const button = new ButtonBuilder()
+      .setCustomId('create_ticket')
+      .setLabel('Ticket Aç')
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji('📩');
 
-    const row = new ActionRowBuilder().addComponents(selectMenu);
+    const row = new ActionRowBuilder().addComponents(button);
 
     await ticketChannel.send({ embeds: [embed], components: [row] });
-    await interaction.reply({ content: '✅ Select menülü ticket paneli gönderildi.', ephemeral: true });
+    await interaction.reply({ content: '✅ Ticket panel mesajı gönderildi.', ephemeral: true });
   },
 };
