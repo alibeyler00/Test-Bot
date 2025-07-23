@@ -1,91 +1,74 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('sunucu-kur')
     .setDescription('Emergency Hamburg RP sunucu yapısını oluşturur.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-  
+
   async execute(interaction) {
     await interaction.reply({ content: '⏳ Sunucu yapısı oluşturuluyor...', ephemeral: true });
 
     const guild = interaction.guild;
 
-    // Temiz isim - kanal oluşturucu
-    const createChannel = async (name, type, parent = null) => {
-      return await guild.channels.create({
+    const createChannel = async (name, type, parentId = null) => {
+      const options = {
         name,
         type,
-        parent
-      });
+      };
+      if (parentId) options.parent = parentId;
+      return await guild.channels.create(options);
     };
 
     const categories = {};
 
-    // 📋・Kayıt Sistemleri
-    categories.kayit = await guild.channels.create({
-      name: '📋・kayıt-sistemleri',
-      type: 4,
-    });
-    await createChannel('🛂・kayıt-ol', 0, categories.kayit.id);
-    await createChannel('✅・kayıt-onay', 0, categories.kayit.id);
-    await createChannel('📜・kurallar', 0, categories.kayit.id);
-    await createChannel('🎮・oyuncu-rolleri', 0, categories.kayit.id);
-    await createChannel('👥・rol-seçimi', 0, categories.kayit.id);
+    categories.kayit = await createChannel('📋・kayıt-sistemleri', ChannelType.GuildCategory);
+    await createChannel('🛂・kayıt-ol', ChannelType.GuildText, categories.kayit.id);
+    await createChannel('✅・kayıt-onay', ChannelType.GuildText, categories.kayit.id);
+    await createChannel('📜・kurallar', ChannelType.GuildText, categories.kayit.id);
+    await createChannel('🎮・oyuncu-rolleri', ChannelType.GuildText, categories.kayit.id);
+    await createChannel('👥・rol-seçimi', ChannelType.GuildText, categories.kayit.id);
 
-    // 📢・Duyuru Alanı
-    categories.duyuru = await guild.channels.create({
-      name: '📢・duyuru-alanı',
-      type: 4,
-    });
-    await createChannel('📢・duyurular', 0, categories.duyuru.id);
-    await createChannel('🛠️・bakım-duyuruları', 0, categories.duyuru.id);
-    await createChannel('🎉・etkinlik-duyuruları', 0, categories.duyuru.id);
-    await createChannel('🔔・ping-duyuruları', 0, categories.duyuru.id);
-    await createChannel('🚨・acil-bildirim', 0, categories.duyuru.id);
+    categories.duyuru = await createChannel('📢・duyuru-alanı', ChannelType.GuildCategory);
+    await createChannel('📢・duyurular', ChannelType.GuildText, categories.duyuru.id);
+    await createChannel('🛠️・bakım-duyuruları', ChannelType.GuildText, categories.duyuru.id);
+    await createChannel('🎉・etkinlik-duyuruları', ChannelType.GuildText, categories.duyuru.id);
+    await createChannel('🔔・ping-duyuruları', ChannelType.GuildText, categories.duyuru.id);
+    await createChannel('🚨・acil-bildirim', ChannelType.GuildText, categories.duyuru.id);
 
-    // 🧑‍💼・Yetkili Alanı
-    categories.yetkili = await guild.channels.create({
-      name: '🧑‍💼・yetkili-alanı',
-      type: 4,
-    });
-    await createChannel('🧑‍⚖️・yetkili-sohbet', 0, categories.yetkili.id);
-    await createChannel('📝・şikayet-kayıtları', 0, categories.yetkili.id);
-    await createChannel('📂・kullanıcı-kayıtları', 0, categories.yetkili.id);
-    await createChannel('🔧・yetkili-komut', 0, categories.yetkili.id);
-    await createChannel('📊・raporlar', 0, categories.yetkili.id);
+    categories.yetkili = await createChannel('🧑‍💼・yetkili-alanı', ChannelType.GuildCategory);
+    await createChannel('🧑‍⚖️・yetkili-sohbet', ChannelType.GuildText, categories.yetkili.id);
+    await createChannel('📝・şikayet-kayıtları', ChannelType.GuildText, categories.yetkili.id);
+    await createChannel('📂・kullanıcı-kayıtları', ChannelType.GuildText, categories.yetkili.id);
+    await createChannel('🔧・yetkili-komut', ChannelType.GuildText, categories.yetkili.id);
+    await createChannel('📊・raporlar', ChannelType.GuildText, categories.yetkili.id);
 
-    // 💬・Genel Sohbet
-    categories.genel = await guild.channels.create({
-      name: '💬・genel-sohbet',
-      type: 4,
-    });
-    await createChannel('💬・genel-sohbet', 0, categories.genel.id);
-    await createChannel('🤖・komutlar', 0, categories.genel.id);
-    await createChannel('🎮・oyun-içi-sohbet', 0, categories.genel.id);
-    await createChannel('🖼️・medya-paylaşım', 0, categories.genel.id);
-    await createChannel('🎧・müzik-komutları', 0, categories.genel.id);
+    categories.genel = await createChannel('💬・genel-sohbet', ChannelType.GuildCategory);
+    await createChannel('💬・genel-sohbet', ChannelType.GuildText, categories.genel.id);
+    await createChannel('🤖・komutlar', ChannelType.GuildText, categories.genel.id);
+    await createChannel('🎮・oyun-içi-sohbet', ChannelType.GuildText, categories.genel.id);
+    await createChannel('🖼️・medya-paylaşım', ChannelType.GuildText, categories.genel.id);
+    await createChannel('🎧・müzik-komutları', ChannelType.GuildText, categories.genel.id);
 
-    // 🚓・RP Birimleri
-    categories.rpPolis = await guild.channels.create({ name: '👮・polis-rp', type: 4 });
-    await createChannel('🚔・polis-sohbet', 0, categories.rpPolis.id);
-    await createChannel('📻・radyo-kanalı', 0, categories.rpPolis.id);
-    await createChannel('🧾・tutanaklar', 0, categories.rpPolis.id);
+    categories.rpPolis = await createChannel('👮・polis-rp', ChannelType.GuildCategory);
+    await createChannel('🚔・polis-sohbet', ChannelType.GuildText, categories.rpPolis.id);
+    await createChannel('📻・radyo-kanalı', ChannelType.GuildText, categories.rpPolis.id);
+    await createChannel('🧾・tutanaklar', ChannelType.GuildText, categories.rpPolis.id);
 
-    categories.rpItfaiye = await guild.channels.create({ name: '🧑‍🚒・itfaiye-rp', type: 4 });
-    await createChannel('🚒・itfaiye-sohbet', 0, categories.rpItfaiye.id);
-    await createChannel('🔥・yangın-ihbarları', 0, categories.rpItfaiye.id);
-    await createChannel('🪓・ekipman-emri', 0, categories.rpItfaiye.id);
+    categories.rpItfaiye = await createChannel('🧑‍🚒・itfaiye-rp', ChannelType.GuildCategory);
+    await createChannel('🚒・itfaiye-sohbet', ChannelType.GuildText, categories.rpItfaiye.id);
+    await createChannel('🔥・yangın-ihbarları', ChannelType.GuildText, categories.rpItfaiye.id);
+    await createChannel('🪓・ekipman-emri', ChannelType.GuildText, categories.rpItfaiye.id);
 
-    categories.rpSaglik = await guild.channels.create({ name: '🚑・sağlık-rp', type: 4 });
-    await createChannel('🚑・ambulans-sohbet', 0, categories.rpSaglik.id);
-    await createChannel('🩺・hasta-kayıtları', 0, categories.rpSaglik.id);
-    await createChannel('💊・eczane-raporu', 0, categories.rpSaglik.id);
+    categories.rpSaglik = await createChannel('🚑・sağlık-rp', ChannelType.GuildCategory);
+    await createChannel('🚑・ambulans-sohbet', ChannelType.GuildText, categories.rpSaglik.id);
+    await createChannel('🩺・hasta-kayıtları', ChannelType.GuildText, categories.rpSaglik.id);
+    await createChannel('💊・eczane-raporu', ChannelType.GuildText, categories.rpSaglik.id);
 
-    categories.rpSivil = await guild.channels.create({ name: '🚗・sivil-rp', type: 4 });
-    await createChannel('🏠・ev-sohbeti', 0, categories.rpSivil.id);
-    await createChannel('🚙・araç-satın-al', 0, categories.rpSivil.id);
-    await createChannel('🛒・alışveriş-merkezi', 0, categories.rpSivil.id);
+    categories.rpSivil = await createChannel('🚗・sivil-rp', ChannelType.GuildCategory);
+    await createChannel('🏠・ev-sohbeti', ChannelType.GuildText, categories.rpSivil.id);
+    await createChannel('🚙・araç-satın-al', ChannelType.GuildText, categories.rpSivil.id);
+    await createChannel('🛒・alışveriş-merkezi', ChannelType.GuildText, categories.rpSivil.id);
 
     await interaction.editReply({ content: '✅ Emergency Hamburg RP sunucu yapısı başarıyla oluşturuldu!' });
   },
