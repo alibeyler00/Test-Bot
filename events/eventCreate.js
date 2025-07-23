@@ -156,4 +156,25 @@ module.exports = async (client) => {
     }
 
   });
+  client.on('messageCreate', async (message) => {
+    // Bot mesajlarını ve DM'leri yoksay
+    if (message.author.bot || !message.guild) return;
+
+    const prefix = '!'; // Burayı istediğin gibi değiştirebilirsin
+
+    if (!message.content.startsWith(prefix)) return;
+
+    const args = message.content.slice(prefix.length).trim().split(/ +/);
+    const commandName = args.shift().toLowerCase();
+
+    const command = client.commands.get(commandName);
+    if (!command) return;
+
+    try {
+      await command.execute(message, args); // execute fonksiyonu mesaj tabanlı komutları desteklemeli
+    } catch (error) {
+      console.error(error);
+      await message.reply('❌ Komutu çalıştırırken bir hata oluştu.');
+    }
+  });
 };

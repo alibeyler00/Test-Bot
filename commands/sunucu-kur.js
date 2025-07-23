@@ -1,15 +1,18 @@
-const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
+const { ChannelType, PermissionsBitField } = require('discord.js');
 
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName('sunucu-kur')
-    .setDescription('Emergency Hamburg RP sunucu yapısını oluşturur.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+  name: 'sunucu-kur', // ← Burası önemli
+  description: 'Emergency Hamburg RP sunucu yapısını oluşturur.',
+  async execute(message, args) {
+    if (!message.guild) return;
+    if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator) &&
+        !message.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) {
+      return message.reply('❌ Bu komutu kullanmak için **Yönetici** veya **Kanal Yönetimi** yetkisine sahip olmalısın.');
+    }
 
-  async execute(interaction) {
-    await interaction.reply({ content: '⏳ Sunucu yapısı oluşturuluyor...', ephemeral: true });
+    await message.reply('⏳ Sunucu yapısı oluşturuluyor...');
 
-    const guild = interaction.guild;
+    const guild = message.guild;
 
     const createChannel = async (name, type, parentId = null) => {
       const options = {
@@ -70,6 +73,6 @@ module.exports = {
     await createChannel('🚙・araç-satın-al', ChannelType.GuildText, categories.rpSivil.id);
     await createChannel('🛒・alışveriş-merkezi', ChannelType.GuildText, categories.rpSivil.id);
 
-    await interaction.editReply({ content: '✅ Emergency Hamburg RP sunucu yapısı başarıyla oluşturuldu!' });
+    await message.reply('✅ Emergency Hamburg RP sunucu yapısı başarıyla oluşturuldu!');
   },
 };

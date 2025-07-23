@@ -56,11 +56,14 @@ const path = require('path');
     const commandFiles = fs.readdirSync(folder).filter(file => file.endsWith('.js'));
     for (const file of commandFiles) {
       const command = require(path.join(folder, file));
-      if (command.data && typeof command.execute === 'function') {
-        client.commands.set(command.data.name, command);
-        console.log(`[✅] Komut yüklendi: ${command.data.name}`);
-      } else {
-        console.warn(`[UYARI] Geçersiz komut yapısı: ${file}`);
+      if (typeof command.execute === 'function') {
+        const commandName = command.data?.name || command.name;
+        if (!commandName) {
+          console.warn(`[UYARI] Komut adı tanımlı değil: ${file}`);
+          continue;
+        }
+        client.commands.set(commandName, command);
+        console.log(`[✅] Komut yüklendi: ${commandName}`);
       }
     }
   }
@@ -77,7 +80,13 @@ const path = require('path');
     const rest = new REST({ version: '10' }).setToken(token);
 
     const commandsJson = [];
-    client.commands.forEach(cmd => commandsJson.push(cmd.data.toJSON()));
+    client.commands.forEach(cmd => {
+      if (cmd.data && typeof cmd.data.toJSON === 'function') {
+        commandsJson.push(cmd.data.toJSON());
+      } else {
+        console.warn(`[UYARI] Komutun data veya toJSON metodu yok: ${cmd.name || 'isim yok'}`);
+      }
+    });
 
     try {
       console.log('🔄 Slash komutları global olarak kaydediliyor...');
